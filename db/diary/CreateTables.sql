@@ -5,6 +5,9 @@ DROP TABLE IF EXISTS diary_tag CASCADE;
 DROP TABLE IF EXISTS tag CASCADE;
 DROP TABLE IF EXISTS sticker CASCADE;
 DROP TABLE IF EXISTS diary CASCADE;
+DROP TABLE IF EXISTS shared_diary_comment;
+DROP TABLE IF EXISTS shared_diary;
+DROP TABLE IF EXISTS shared_diary_room;
 
 -- diary 테이블 생성
 CREATE TABLE IF NOT EXISTS diary
@@ -68,4 +71,33 @@ CREATE TABLE IF NOT EXISTS sticker
     name        VARCHAR(255) NULL,
     svg_code    TEXT         NULL,
     CONSTRAINT pk_sticker_id PRIMARY KEY (id)
+);
+
+-- 공유 일기방 테이블 생성
+CREATE TABLE shared_diary_room (
+                                   id INT AUTO_INCREMENT PRIMARY KEY COMMENT '공유 일기 방 id',
+                                   user_id1 INT COMMENT '유저 id1',
+                                   user_id2 INT COMMENT '유저 id2'
+);
+
+-- 공유 일기 테이블 생성
+CREATE TABLE shared_diary (
+                              id INT AUTO_INCREMENT PRIMARY KEY COMMENT '공유 일기 id',
+                              content TEXT COMMENT '일기 내용',
+                              created_at DATETIME COMMENT '작성 시간',
+                              title VARCHAR(255) COMMENT '일기 제목',
+                              is_deleted BOOLEAN DEFAULT FALSE COMMENT '삭제 여부',
+                              fixed_state BOOLEAN DEFAULT FALSE COMMENT '작성 상태',
+                              shared_diary_room_id INT COMMENT '공유 일기 방 id',
+                              user_id INT COMMENT '작성자 id',
+                              FOREIGN KEY (shared_diary_room_id) REFERENCES shared_diary_room(id)
+);
+
+-- 공유 일기 댓글 테이블 생성
+CREATE TABLE shared_diary_comment (
+                                      id INT AUTO_INCREMENT PRIMARY KEY COMMENT '공유 일기 댓글 id',
+                                      comment_content VARCHAR(255) COMMENT '댓글 내용',
+                                      shared_diary_id INT COMMENT '공유 일기 id',
+                                      user_id INT COMMENT '작성자 id',
+                                      FOREIGN KEY (shared_diary_id) REFERENCES shared_diary(id)
 );
