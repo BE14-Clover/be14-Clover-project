@@ -3,7 +3,6 @@ name: Feature 템플릿
 about: 기능 추가 관련 템플릿
 title: ''
 labels: ''
-assignees: Gombo2
 
 ---
 
