@@ -1,11 +1,11 @@
-use moodiary;
+use moodiarydb;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
-DROP TABLE IF EXISTS `user`;
-DROP TABLE IF EXISTS `register_questions`;
-DROP TABLE IF EXISTS `user_pet`;
-DROP TABLE IF EXISTS `pet`;
+DROP TABLE IF EXISTS `user` CASCADE;
+DROP TABLE IF EXISTS `register_questions` CASCADE;
+DROP TABLE IF EXISTS `user_pet` CASCADE;
+DROP TABLE IF EXISTS `pet` CASCADE;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -21,8 +21,8 @@ CREATE TABLE `register_questions` (
 CREATE TABLE `user` (
     `id`                            INT NOT NULL AUTO_INCREMENT,
     `name`                          VARCHAR(30) NOT NULL,
-    `phone_number`                  VARCHAR(15) NOT NULL,
-    `email`                         VARCHAR(255) NOT NULL,
+    `phone_number`                  VARCHAR(15) NOT NULL UNIQUE,
+    `email`                         VARCHAR(255) NOT NULL UNIQUE,
     `password`                      VARCHAR(255) NOT NULL,
     `is_deleted`                    BOOLEAN NOT NULL DEFAULT FALSE,
     `answer`                        VARCHAR(255) NOT NULL,
@@ -30,8 +30,6 @@ CREATE TABLE `user` (
     
     CONSTRAINT `PK_user`
         PRIMARY KEY (`id`),
-    UNIQUE KEY `UK_phone_number` (`phone_number`),
-    UNIQUE KEY `UK_email` (`email`),
     
     CONSTRAINT `FK_user_to_register_questions`
         FOREIGN KEY (`register_questions_id`)
