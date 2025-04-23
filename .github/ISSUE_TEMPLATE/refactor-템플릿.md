@@ -1,15 +1,19 @@
 ---
-name: Feature 템플릿
-about: 기능 추가 관련 템플릿
+name: Refactor 템플릿
+about: 기능 수정 관련 템플릿
 title: ''
 labels: ''
-assignees: ''
+assignees: Gombo2
 
 ---
 
 ## 어떤 기능인가요?
 
 > 추가하려는 기능에 대해 간결하게 설명해주세요
+
+## 수정된 부분
+
+> 수정된 부분에 대해서 설명해주세요
 
 ## 작업 상세 내용
 
