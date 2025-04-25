@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.clover.moodiary.user.query.dto.RequestEmailDTO;
 import com.clover.moodiary.user.query.dto.RequestPasswordDTO;
+import com.clover.moodiary.user.query.dto.UserDTO;
 import com.clover.moodiary.user.query.dto.UserEmailDTO;
 import com.clover.moodiary.user.query.dto.UserPasswordDTO;
 import com.clover.moodiary.user.query.service.UserService;
@@ -30,7 +31,7 @@ public class UserController {
 	}
 
 	@GetMapping("/email")
-	public ResponseEntity<UserEmailDTO> getEmail(@PathVariable RequestEmailDTO request) {
+	public ResponseEntity<UserEmailDTO> getEmail(@RequestBody RequestEmailDTO request) {
 
 		UserEmailDTO response = UserService.findEmail(request);
 
@@ -38,9 +39,17 @@ public class UserController {
 	}
 
 	@GetMapping("/password")
-	public ResponseEntity<UserPasswordDTO> getPassword(@PathVariable RequestPasswordDTO request) {
+	public ResponseEntity<UserPasswordDTO> getPassword(@RequestBody RequestPasswordDTO request) {
 
-		UserPasswordDTO response = UserService.findPassowrd(request);
+		UserPasswordDTO response = UserService.findPassword(request);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/info/{userId}")
+	public ResponseEntity<UserDTO> getInfo(@PathVariable int userId) {
+
+		UserDTO response = UserService.findInfo(userId);
 
 		return ResponseEntity.ok(response);
 	}
