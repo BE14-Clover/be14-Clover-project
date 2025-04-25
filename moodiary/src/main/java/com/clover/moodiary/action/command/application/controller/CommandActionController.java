@@ -30,8 +30,7 @@ public class CommandActionController {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		return ResponseEntity.created(URI.create("/")) // 메인 화면으로 이동
-							 .build();
+		return ResponseEntity.ok("User Preferences Initialization Success");
 	}
 	
 	/* 목차. 회원의 가중치 증가 */
