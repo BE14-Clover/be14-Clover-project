@@ -15,5 +15,5 @@ public class UserPreferencesDTO {
 	private int userId;
 	private int actionTagId;
 	private int weight;
-	private java.util.Date last_recommended_at;
+	private java.util.Date lastRecommendedAt;
 }
