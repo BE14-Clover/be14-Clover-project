@@ -68,18 +68,6 @@ CREATE TABLE IF NOT EXISTS emotion_analyze
     CONSTRAINT fk_emotion_analyze_diary_id FOREIGN KEY (diary_id) REFERENCES diary (id)
 );
 
--- picture 테이블 생성
-CREATE TABLE IF NOT EXISTS picture
-(
-    id              INT  NOT NULL AUTO_INCREMENT,
-    image_path      TEXT NOT NULL,
-    diary_id        INT  NULL,
-    shared_diary_id INT  NULL,
-    CONSTRAINT pk_picture_id PRIMARY KEY (id),
-    CONSTRAINT fk_picture_diary_id FOREIGN KEY (diary_id) REFERENCES diary (id) ON DELETE CASCADE,
-    CONSTRAINT fk_picture_shared_diary_id FOREIGN KEY (shared_diary_id) REFERENCES shared_diary (id) ON DELETE CASCADE
-);
-
 -- tag 테이블 생성
 CREATE TABLE IF NOT EXISTS tag
 (
@@ -137,7 +125,19 @@ CREATE TABLE shared_diary_comment
     user_id         INT          NOT NULL COMMENT '작성자 id',
     CONSTRAINT pk_shared_diary_comment_id PRIMARY KEY (id),
     CONSTRAINT fk_shared_diary_comment_shared_diary_id FOREIGN KEY (shared_diary_id) REFERENCES shared_diary (id),
-    CONSTRAINT fk_shared_diary_comment_user_id FOREIGN KEY (shared_diary_id) REFERENCES user (id)
+    CONSTRAINT fk_shared_diary_comment_user_id FOREIGN KEY (user_id) REFERENCES user (id)
+);
+
+-- picture 테이블 생성
+CREATE TABLE IF NOT EXISTS picture
+(
+    id              INT  NOT NULL AUTO_INCREMENT,
+    image_path      TEXT NOT NULL,
+    diary_id        INT  NULL,
+    shared_diary_id INT  NULL,
+    CONSTRAINT pk_picture_id PRIMARY KEY (id),
+    CONSTRAINT fk_picture_diary_id FOREIGN KEY (diary_id) REFERENCES diary (id) ON DELETE CASCADE,
+    CONSTRAINT fk_picture_shared_diary_id FOREIGN KEY (shared_diary_id) REFERENCES shared_diary (id) ON DELETE CASCADE
 );
 
 CREATE TABLE pet
