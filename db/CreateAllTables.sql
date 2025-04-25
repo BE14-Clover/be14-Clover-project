@@ -60,10 +60,16 @@ CREATE TABLE IF NOT EXISTS diary
 -- emotion_analyze 테이블 생성
 CREATE TABLE IF NOT EXISTS emotion_analyze
 (
-    id               INT  NOT NULL AUTO_INCREMENT,
-    total_score      INT  NOT NULL,
-    analysis_content TEXT NOT NULL,
-    diary_id         INT  NOT NULL,
+    id               INT          NOT NULL AUTO_INCREMENT,
+    total_score      INT          NOT NULL,
+    positive_score   INT          NOT NULL,
+    neutral_score    INT          NOT NULL,
+    negative_score   INT          NOT NULL,
+    emotion_summary1 VARCHAR(255) NOT NULL,
+    emotion_summary2 VARCHAR(255) NOT NULL,
+    emotion_summary3 VARCHAR(255) NOT NULL,
+    diary_summary    VARCHAR(255) NOT NULL,
+    diary_id         INT          NOT NULL,
     CONSTRAINT pk_emotion_analyze_id PRIMARY KEY (id),
     CONSTRAINT fk_emotion_analyze_diary_id FOREIGN KEY (diary_id) REFERENCES diary (id)
 );
