@@ -45,15 +45,14 @@ CREATE TABLE user
 -- diary 테이블 생성
 CREATE TABLE IF NOT EXISTS diary
 (
-    id            INT          NOT NULL AUTO_INCREMENT,
-    title         VARCHAR(255) NULL COMMENT '제목 없으면 해당 날짜 DATE 형식으로 작성됨',
-    content       TEXT         NOT NULL,
-    created_at    DATETIME     NOT NULL,
-    is_deleted    VARCHAR(4)   NOT NULL DEFAULT 'N' COMMENT '소프트 딜리트',
-    is_confirmed  VARCHAR(4)   NOT NULL DEFAULT 'N' COMMENT '확정 Y, 확정 N (04시에 스케줄러로 일괄처리)',
-    sticker_layer TEXT         NULL,
-    picture_layer TEXT         NULL,
-    user_id       INT          NOT NULL,
+    id           INT          NOT NULL AUTO_INCREMENT,
+    title        VARCHAR(255) NULL COMMENT '제목 없으면 해당 날짜 DATE 형식으로 작성됨',
+    content      TEXT         NOT NULL,
+    created_at   DATETIME     NOT NULL,
+    is_deleted   VARCHAR(4)   NOT NULL DEFAULT 'N' COMMENT '소프트 딜리트',
+    is_confirmed VARCHAR(4)   NOT NULL DEFAULT 'N' COMMENT '확정 Y, 확정 N (04시에 스케줄러로 일괄처리)',
+    style_layer  TEXT         NULL,
+    user_id      INT          NOT NULL,
     CONSTRAINT pk_diary_id PRIMARY KEY (id),
     CONSTRAINT fk_diary_user_id FOREIGN KEY (user_id) REFERENCES user (id)
 );
@@ -119,8 +118,7 @@ CREATE TABLE shared_diary
     created_at           DATETIME     NOT NULL COMMENT '작성 시간',
     is_deleted           VARCHAR(4)   NOT NULL DEFAULT 'N' COMMENT '삭제 여부',
     fixed_state          VARCHAR(4)   NOT NULL DEFAULT 'N' COMMENT '작성 상태',
-    sticker_layer        TEXT         NULL COMMENT '스티커 레이어',
-    picture_layer        TEXT         NULL COMMENT '사진 레이어',
+    style_layer          TEXT         NULL COMMENT '스티커 레이어',
     shared_diary_room_id INT          NOT NULL COMMENT '공유 일기 방 id',
     user_id              INT          NOT NULL COMMENT '작성자 id',
     CONSTRAINT pk_shared_diary_room_id PRIMARY KEY (id),
