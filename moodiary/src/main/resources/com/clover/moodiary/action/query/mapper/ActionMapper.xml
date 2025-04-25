@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clover.moodiary.action.query.mapper.ActionMapper">
+
+    <!-- 설명. 행동 태그 ResultMap -->
+    <resultMap id="ActionTagResultMap" type="com.clover.moodiary.action.command.application.dto.ActionTagDTO">
+        <id property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="parentActionTagId" column="PARENT_ACTION_TAG_ID"/>
+    </resultMap>
+
+    <!-- 설명. 사용자 선호도 ResultMap -->
+
+    <!-- 설명. 전체 행동 태그 id 조회 -->
+    <select id="selectActionTagIdList" resultMap="ActionTagResultMap">
+        SELECT
+               AT.ID
+             , AT.NAME
+             , AT.PARENT_ACTION_TAG_ID
+          FROM ACTION_TAG AT
+    </select>
+</mapper>
