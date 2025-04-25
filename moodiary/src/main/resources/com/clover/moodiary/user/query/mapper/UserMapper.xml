@@ -3,3 +3,28 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.clover.moodiary.user.query.mapper.UserMapper">
+    <select id="selectEmail" parameterType="com.clover.moodiary.user.query.dto.RequestEmailDTO" resultType="com.clover.moodiary.user.query.dto.UserEmailDTO">
+        SELECT email
+        FROM user
+        WHERE name = #{name}
+          AND phone_number = #{phoneNumber}
+          AND register_questions_id = #{registerQuestionsId}
+          AND answer = #{answer}
+    </select>
+
+    <select id="selectInfo" parameterType="int" resultType="com.clover.moodiary.user.query.dto.UserDTO">
+        SELECT
+            id,
+            name,
+            phone_number,
+            email,
+            password,
+            is_deleted,
+            answer,
+            register_questions_id
+        FROM user
+        WHERE id = #{id}
+    </select>
+</mapper>

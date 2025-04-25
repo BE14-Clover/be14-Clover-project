@@ -22,6 +22,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserEmailDTO findEmail(RequestEmailDTO request) {
+
 		return userMapper.selectEmail(request);
 	}
 

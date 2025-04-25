@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UserController {
 
-	private UserService userService;
+	private final UserService userService;
 
 	@Autowired
 	public UserController(UserService userService) {
@@ -30,10 +31,10 @@ public class UserController {
 
 	}
 
-	@GetMapping("/email")
+	@PostMapping("/email")
 	public ResponseEntity<UserEmailDTO> getEmail(@RequestBody RequestEmailDTO request) {
 
-		UserEmailDTO response = UserService.findEmail(request);
+		UserEmailDTO response = userService.findEmail(request);
 
 		return ResponseEntity.ok(response);
 	}
@@ -41,7 +42,7 @@ public class UserController {
 	@GetMapping("/password")
 	public ResponseEntity<UserPasswordDTO> getPassword(@RequestBody RequestPasswordDTO request) {
 
-		UserPasswordDTO response = UserService.findPassword(request);
+		UserPasswordDTO response = userService.findPassword(request);
 
 		return ResponseEntity.ok(response);
 	}
@@ -49,7 +50,7 @@ public class UserController {
 	@GetMapping("/info/{userId}")
 	public ResponseEntity<UserDTO> getInfo(@PathVariable int userId) {
 
-		UserDTO response = UserService.findInfo(userId);
+		UserDTO response = userService.findInfo(userId);
 
 		return ResponseEntity.ok(response);
 	}
