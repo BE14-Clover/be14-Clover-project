@@ -8,5 +8,6 @@ import lombok.Setter;
 public class RequestEmailDTO {
 	private String name;
 	private String phoneNumber;
+	private String registerQuestionsId;
 	private String answer;
 }
