@@ -11,14 +11,98 @@
         <result property="parentActionTagId" column="PARENT_ACTION_TAG_ID"/>
     </resultMap>
 
+    <!-- 설명. 추천 행동 ResultMap -->
+    <resultMap id="RecommendedActionResultMap" type="com.clover.moodiary.action.command.application.dto.RecommendedActionDTO">
+        <id property="id" column="ID"/>
+        <result property="action" column="ACTION"/>
+    </resultMap>
+
+    <!-- 설명. 태그화된 추천 행동 ResultMap -->
+    <resultMap id="TaggedRecommendedActionResultMap" type="com.clover.moodiary.action.command.application.dto.TaggedRecommendedActionsDTO">
+        <id property="recommendedActionsId" column="RECOMMENDED_ACTIONS_ID"/>
+        <result property="actionTagId" column="ACTION_TAG_ID"/>
+    </resultMap>
+
     <!-- 설명. 사용자 선호도 ResultMap -->
+    <resultMap id="UserPreferencesResultMap" type="com.clover.moodiary.action.command.application.dto.UserPreferencesDTO">
+        <id property="userId" column="USER_ID"/>
+        <result property="actionTagId" column="ACTION_TAG_ID"/>
+        <result property="weight" column="WEIGHT"/>
+        <result property="lastRecommendedAt" column="LAST_RECOMMENDED_AT"/>
+    </resultMap>
 
     <!-- 설명. 전체 행동 태그 id 조회 -->
     <select id="selectActionTagIdList" resultMap="ActionTagResultMap">
         SELECT
                AT.ID
+          FROM ACTION_TAG AT
+    </select>
+
+    <!-- 설명. 행동 태그 id로 부모 행동 태그 조회 -->
+    <select id="selectParentActionTagByActionTag" resultMap="ActionTagResultMap" parameterType="_int">
+        SELECT
+               AT.ID
              , AT.NAME
              , AT.PARENT_ACTION_TAG_ID
           FROM ACTION_TAG AT
+         WHERE AT.ID = (
+             SELECT AT2.PARENT_ACTION_TAG_ID
+               FROM ACTION_TAG AT2
+              WHERE AT2.ID = #{actionTagId}
+         )
+    </select>
+
+    <!-- 설명. 부모 행동 태그 id로 행동 태그 조회 -->
+    <select id="selectActionTagByParentActionId" resultMap="ActionTagResultMap" resultType="_int">
+        SELECT
+               AT.ID
+             , AT.NAME
+             , AT.PARENT_ACTION_TAG_ID
+         FROM ACTION_TAG AT
+        <if test="parentActionTagId == 0">
+            WHERE PARENT_ACTION_TAG_ID IS NULL
+        </if>
+        <if test="parentActionTagId != 0">
+            WHERE PARENT_ACTION_TAG_ID = #{parentActionTagId}
+        </if>
+    </select>
+
+    <!-- 설명. 추천 행동 id로 행동 이름 조회 -->
+    <select id="selectRecommendedActionById" resultMap="RecommendedActionResultMap" parameterType="_int">
+        SELECT
+               RA.ID
+             , RA.ACTION
+          FROM RECOMMENDED_ACTIONS RA
+         WHERE RA.ID = #{actionId}
+    </select>
+
+    <!-- 설명. 행동 id로 행동 태그(리스트) 조회 -->
+    <select id="selectActionTagByActionId" resultMap="TaggedRecommendedActionResultMap" parameterType="_int">
+        SELECT
+               TRA.RECOMMENDED_ACTIONS_ID
+             , TRA.ACTION_TAG_ID
+          FROM TAGGED_RECOMMENDED_ACTIONS TRA
+         WHERE TRA.RECOMMENDED_ACTIONS_ID = #{actionId}
+    </select>
+
+    <!-- 설명. 행동 id로 행동 태그(리스트) 조회 -->
+    <select id="selectRecommendedActionIdByActionTagId" resultMap="TaggedRecommendedActionResultMap" parameterType="_int">
+        SELECT
+               TRA.RECOMMENDED_ACTIONS_ID
+             , TRA.ACTION_TAG_ID
+          FROM TAGGED_RECOMMENDED_ACTIONS TRA
+         WHERE TRA.ACTION_TAG_ID = #{randomActionTagId}
+    </select>
+
+    <!-- 설명. 행동 태그 id로 회원의 가중치 조회 -->
+    <select id="selectUserPreferencesByActionTagId" resultMap="UserPreferencesResultMap" parameterType="_int">
+        SELECT
+               UP.USER_ID
+             , UP.ACTION_TAG_ID
+             , UP.WEIGHT
+             , UP.LAST_RECOMMENDED_AT
+          FROM USER_PREFERENCES UP
+         WHERE UP.USER_ID = #{param1}
+           AND UP.ACTION_TAG_ID = #{param2}
     </select>
 </mapper>
