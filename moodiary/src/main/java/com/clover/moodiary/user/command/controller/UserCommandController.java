@@ -1,4 +1,3 @@
-// com.clover.moodiary.user.command.controller/UserCommandController.java
 package com.clover.moodiary.user.command.controller;
 
 import com.clover.moodiary.user.command.dto.*;
@@ -19,12 +18,6 @@ public class UserCommandController {
 		return ResponseEntity.ok().build();
 	}
 
-	@PostMapping("/delete/{userId}")
-	public ResponseEntity<Void> delete(@PathVariable int userId) {
-		svc.deleteAccount(userId);
-		return ResponseEntity.ok().build();
-	}
-
 	@PostMapping("/login")
 	public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest dto) {
 		return ResponseEntity.ok(svc.login(dto));
@@ -34,6 +27,18 @@ public class UserCommandController {
 	public ResponseEntity<Void> logout(@RequestHeader("Authorization") String token) {
 		svc.logout(token.replace("Bearer ", ""));
 		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/delete/{userId}")
+	public ResponseEntity<Void> delete(@PathVariable int userId) {
+		svc.deleteAccount(userId);
+		return ResponseEntity.ok().build();
+	}
+
+	@PutMapping("/update")
+	public ResponseEntity<Void> update(@RequestBody UpdateUserRequest dto) {
+		svc.updateUser(dto);
+		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping("/request-password-reset")
