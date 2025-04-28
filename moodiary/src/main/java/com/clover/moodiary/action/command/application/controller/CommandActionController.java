@@ -1,5 +1,8 @@
 package com.clover.moodiary.action.command.application.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,17 +38,19 @@ public class CommandActionController {
 		return ResponseEntity.ok("User Preferences Initialization Success");
 	}
 	
-	/* 목차. 회원의 가중치 증가 */
-	@PostMapping("/{actionId}/plus")
-	public ResponseEntity<String> plusUserPreferences(@PathVariable(value = "actionId") int actionId, @RequestParam(value = "userId") int userId) {
-		commandActionService.plusUserPreferences(userId, actionId);
+	/* 목차. 회원의 가중치 변경 */
+	@PostMapping("/{actionId}/change")
+	public ResponseEntity<String> plusUserPreferences(@PathVariable(value = "actionId") int actionId, @RequestParam(value = "userId") int userId, @RequestBody Map<String, Integer> changeValue) {
+		commandActionService.changeUserPreferences(userId, actionId, changeValue.get("changeValue"));
 		String actionName = actionService.getRecommendedActionById(actionId).getAction();
-		return ResponseEntity.ok(actionName + " weight plussed");
+		return ResponseEntity.ok(actionName + " weight changed by" + changeValue.get("changeValue"));
 	}
 	
-	/* 목차. 회원의 가중치 감소 */
-	
-	/* 목차. 추천 행동 필터링 */
-	/* 설명. 추천 행동 목록 필터로 체크된 목록 받으면(적용) 해당 목록에 해당하는 가중치 0으로 설정 */
-	
+	/* 목차. 추천 행동 태그 필터링 */
+	/* 설명. 추천 행동 태그 목록 필터로 체크된 목록 받으면(적용) 해당 목록에 해당하는 가중치 0으로 설정 */
+	@PostMapping("/exclude")
+	public ResponseEntity<String> excludeUserPreferences(@RequestParam(value = "userId") int userId, @RequestBody List<Integer> excludingActionTagList) {
+		commandActionService.excludeActionTagList(userId, excludingActionTagList);
+		return ResponseEntity.ok("Following Action Tags Are Excluded: " + excludingActionTagList.toString());
+	}
 }

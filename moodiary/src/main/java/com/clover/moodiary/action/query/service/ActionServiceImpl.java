@@ -47,7 +47,7 @@ public class ActionServiceImpl implements ActionService {
 	}
 	
 	@Override
-	public List<RecommendedActionDTO> getThreeActions(int userId) {
+	public List<RecommendedActionDTO> getThreeActions(int userId) throws RuntimeException {
 		List<RecommendedActionDTO> recommendList = new ArrayList<>();
 		while (recommendList.size() < 3) {
 			int randomActionTagId = getRandomActionId(userId, 0);
@@ -64,9 +64,15 @@ public class ActionServiceImpl implements ActionService {
 		return recommendList;
 	}
 	
+	@Override
+	public List<ActionTagDTO> searchActionTagListByActionTagName(String keyword) {
+		return actionMapper.selectActionTagListByActionTagName(keyword);
+	}
+	
 	/* 설명. 가중치 기반 랜덤 추천 행동 뽑기 */
-	private int getRandomActionId(int userId, int randomActionTagId) {
+	private int getRandomActionId(int userId, int randomActionTagId) throws RuntimeException {
 		List<ActionTagDTO> actionTagDTOList = actionMapper.selectActionTagByParentActionId(randomActionTagId);
+		log.info("actionTagDTOList: {}", actionTagDTOList.toString());
 		if (actionTagDTOList.isEmpty()) {
 			
 			/* 설명. 하위 태그 없을 시 */
@@ -79,16 +85,18 @@ public class ActionServiceImpl implements ActionService {
 				userPreferencesDTOList.add(actionMapper.selectUserPreferencesByActionTagId(userId, actionTagDTOList.get(0).getId()));
 				actionTagDTOList.remove(0);
 			}
+			log.info("userPreferencesDTOList: {}", userPreferencesDTOList);
 			int parentActionTagId = getWeightedRandomActionTagId(userPreferencesDTOList);
 			return getRandomActionId(userId, parentActionTagId);
 		}
 	}
 	
-	private int getWeightedRandomActionTagId(List<UserPreferencesDTO> userPreferencesDTOList) {
+	private int getWeightedRandomActionTagId(List<UserPreferencesDTO> userPreferencesDTOList) throws RuntimeException {
 		int totalWeight = 0;
 		for (UserPreferencesDTO userPreferencesDTO : userPreferencesDTOList) {
 			totalWeight += userPreferencesDTO.getWeight();
 		}
+		if (totalWeight == 0) throw new RuntimeException("No Action Tag Found");
 		int randomValue = (int) (Math.random() * totalWeight);
 		
 		int checkWeight = 0;
@@ -105,7 +113,7 @@ public class ActionServiceImpl implements ActionService {
 	/* 설명. 마지막 태그에 속한 행동들 중 어떤 행동은 다른 태그를 가지고, 어떤 행동은 다른 태그를 갖지 않는다면, 다른 태그에 기반한 랜덤 어떻게? */
 	private int getRandomActionByTagId(int randomActionTagId) {
 		List<TaggedRecommendedActionsDTO> actionList = actionMapper.selectRecommendedActionIdByActionTagId(randomActionTagId);
-		log.info(actionList.toString());
+		log.info("actionList: " + actionList.toString());
 		return actionList.get((int) (Math.random() * actionList.size())).getRecommendedActionsId();
 	}
 }
