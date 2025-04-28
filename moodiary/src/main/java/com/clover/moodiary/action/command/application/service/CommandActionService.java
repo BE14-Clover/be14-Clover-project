@@ -5,4 +5,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface CommandActionService {
 	void insertInitialUserPreferences(int userId);
+	
+	void plusUserPreferences(int userId, int actionId);
 }
