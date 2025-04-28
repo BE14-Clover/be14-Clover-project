@@ -21,5 +21,7 @@ public interface ActionService {
 	
 	ActionTagDTO getParentActionTagByActionTag(int actionTagId);
 	
-	List<RecommendedActionDTO> getThreeActions(int userId);
+	List<RecommendedActionDTO> getThreeActions(int userId) throws RuntimeException;
+	
+	List<ActionTagDTO> searchActionTagListByActionTagName(String keyword);
 }
