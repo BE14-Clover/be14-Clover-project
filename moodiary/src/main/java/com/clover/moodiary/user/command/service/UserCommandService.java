@@ -1,7 +1,18 @@
+// com.clover.moodiary.user.command.service/UserCommandService.java
 package com.clover.moodiary.user.command.service;
 
-import org.springframework.stereotype.Service;
+import com.clover.moodiary.user.command.dto.*;
 
-@Service
 public interface UserCommandService {
+	void register(RegisterRequest dto);
+
+	void deleteAccount(int userId);
+
+	LoginResponse login(LoginRequest dto);
+
+	void logout(String authToken);
+
+	void requestPasswordReset(PasswordResetRequest dto);
+
+	void resetPassword(PasswordReset dto);
 }

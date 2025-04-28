@@ -1,23 +1,50 @@
+// com.clover.moodiary.user.command.controller/UserCommandController.java
 package com.clover.moodiary.user.command.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import com.clover.moodiary.user.command.dto.*;
 import com.clover.moodiary.user.command.service.UserCommandService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import lombok.extern.slf4j.Slf4j;
-
-@RestController("UserCommandController")
-@RequestMapping("/user")
-@Slf4j
+@RestController
+@RequestMapping("/user/command")
+@RequiredArgsConstructor
 public class UserCommandController {
+	private final UserCommandService svc;
 
-	private final UserCommandService userCommandService;
-
-	@Autowired
-	public UserCommandController(UserCommandService userCommandService) {
-		this.userCommandService = userCommandService;
+	@PostMapping("/register")
+	public ResponseEntity<Void> register(@RequestBody RegisterRequest dto) {
+		svc.register(dto);
+		return ResponseEntity.ok().build();
 	}
 
+	@PostMapping("/delete/{userId}")
+	public ResponseEntity<Void> delete(@PathVariable int userId) {
+		svc.deleteAccount(userId);
+		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/login")
+	public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest dto) {
+		return ResponseEntity.ok(svc.login(dto));
+	}
+
+	@PostMapping("/logout")
+	public ResponseEntity<Void> logout(@RequestHeader("Authorization") String token) {
+		svc.logout(token.replace("Bearer ", ""));
+		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/request-password-reset")
+	public ResponseEntity<Void> requestReset(@RequestBody PasswordResetRequest dto) {
+		svc.requestPasswordReset(dto);
+		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/reset-password")
+	public ResponseEntity<Void> reset(@RequestBody PasswordReset dto) {
+		svc.resetPassword(dto);
+		return ResponseEntity.ok().build();
+	}
 }
