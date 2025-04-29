@@ -15,7 +15,7 @@ public class SharedDiaryRoomController {
     private final SharedDiaryRoomService sharedDiaryRoomService;
 
     @GetMapping
-    public List<SharedDiaryRoomResponse> findRoomByUserId(@RequestParam Integer userId) {
+    public List<SharedDiaryRoomResponse> findRoomByUserId(@RequestParam(value="userId") Integer userId) {
         return sharedDiaryRoomService.findRoomByUserId(userId);
     }
 
