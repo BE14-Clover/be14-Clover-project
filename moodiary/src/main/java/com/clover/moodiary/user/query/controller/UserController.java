@@ -1,57 +1,26 @@
 package com.clover.moodiary.user.query.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.clover.moodiary.user.query.dto.RequestEmailDTO;
-import com.clover.moodiary.user.query.dto.RequestPasswordDTO;
-import com.clover.moodiary.user.query.dto.UserDTO;
 import com.clover.moodiary.user.query.dto.UserEmailDTO;
-import com.clover.moodiary.user.query.dto.UserPasswordDTO;
+import com.clover.moodiary.user.query.dto.UserDTO;
 import com.clover.moodiary.user.query.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import lombok.extern.slf4j.Slf4j;
-
-@RestController("UserController")
-@RequestMapping("/user")
-@Slf4j
+@RestController
+@RequestMapping("/user/query")
+@RequiredArgsConstructor
 public class UserController {
-
 	private final UserService userService;
 
-	@Autowired
-	public UserController(UserService userService) {
-		this.userService = userService;
-
-	}
-
 	@PostMapping("/email")
-	public ResponseEntity<UserEmailDTO> getEmail(@RequestBody RequestEmailDTO request) {
-
-		UserEmailDTO response = userService.findEmail(request);
-
-		return ResponseEntity.ok(response);
-	}
-
-	@GetMapping("/password")
-	public ResponseEntity<UserPasswordDTO> getPassword(@RequestBody RequestPasswordDTO request) {
-
-		UserPasswordDTO response = userService.findPassword(request);
-
-		return ResponseEntity.ok(response);
+	public ResponseEntity<UserEmailDTO> findEmail(@RequestBody RequestEmailDTO request) {
+		return ResponseEntity.ok(userService.findEmail(request));
 	}
 
 	@GetMapping("/info/{userId}")
-	public ResponseEntity<UserDTO> getInfo(@PathVariable int userId) {
-
-		UserDTO response = userService.findInfo(userId);
-
-		return ResponseEntity.ok(response);
+	public ResponseEntity<UserDTO> findInfo(@PathVariable int userId) {
+		return ResponseEntity.ok(userService.findInfo(userId));
 	}
 }
