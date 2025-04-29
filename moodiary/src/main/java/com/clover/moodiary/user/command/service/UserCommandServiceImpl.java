@@ -1,4 +1,4 @@
-package com.clover.moodiary.user.command.service.impl;
+package com.clover.moodiary.user.command.service;
 
 import com.clover.moodiary.user.command.dto.*;
 import com.clover.moodiary.user.command.entity.PasswordResetToken;
@@ -11,6 +11,8 @@ import com.clover.moodiary.user.command.service.UserCommandService;
 import com.clover.moodiary.user.command.util.JwtUtil;
 import com.clover.moodiary.user.command.util.MailUtil;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
+@Primary
 @RequiredArgsConstructor
 public class UserCommandServiceImpl implements UserCommandService {
 	private final UserRepository userRepo;

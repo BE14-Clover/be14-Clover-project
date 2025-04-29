@@ -2,6 +2,7 @@ package com.clover.moodiary.user.command.service;
 
 import com.clover.moodiary.user.command.dto.*;
 
+
 public interface UserCommandService {
 	void register(RegisterRequest dto);
 

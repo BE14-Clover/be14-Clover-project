@@ -3,6 +3,9 @@ package com.clover.moodiary.user.command.controller;
 import com.clover.moodiary.user.command.dto.*;
 import com.clover.moodiary.user.command.service.UserCommandService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserCommandController {
 	private final UserCommandService svc;
+
 
 	@PostMapping("/register")
 	public ResponseEntity<Void> register(@RequestBody RegisterRequest dto) {
