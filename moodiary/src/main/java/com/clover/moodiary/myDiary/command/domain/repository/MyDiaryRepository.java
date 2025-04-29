@@ -6,12 +6,23 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Repository
 public interface MyDiaryRepository extends JpaRepository<MyDiaryEntity, Integer> {
 
-    @Query("SELECT d FROM MyDiaryEntity d WHERE d.createdAt = :createdAt AND d.userId = :userId")
-    Optional<MyDiaryEntity> findByCreatedDateAndUserId(@Param("createdAt") LocalDateTime createdAt, @Param("userId") int userId);
+    @Query("SELECT d FROM MyDiaryEntity d WHERE DATE(d.createdAt) = :createdDate AND d.userId = :userId")
+    Optional<MyDiaryEntity> findByCreatedDateAndUserId(@Param("createdDate") LocalDate createdDate, @Param("userId") Integer userId);
 }

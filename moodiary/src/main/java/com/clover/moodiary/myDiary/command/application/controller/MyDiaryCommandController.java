@@ -27,9 +27,13 @@ public class MyDiaryCommandController {
 
     @PostMapping("/regist")
     public ResponseEntity<?> regist(@RequestBody MyDiaryCommandDTO myDiaryCommandDTO) {
-        myDiaryCommandService.registDiary(myDiaryCommandDTO);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body("일기 등록 완료");
+        try {
+            myDiaryCommandService.registDiary(myDiaryCommandDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body("일기 등록 완료");
+        } catch (IllegalStateException e) {
+            log.warn("일기 등록 실패: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
     }
 
 

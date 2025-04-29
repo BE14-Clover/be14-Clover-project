@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -37,13 +38,12 @@ public class MyDiaryCommandServiceImpl implements MyDiaryCommandService {
     @Transactional
     @Override
     public void registDiary(MyDiaryCommandDTO dto) {
-
-        LocalDateTime createdAt = dto.getCreatedAt();
-        boolean exists = myDiaryRepository.findByCreatedDateAndUserId(createdAt, dto.getUserId()).isPresent();
+        LocalDate createdDate = dto.getCreatedAt().toLocalDate(); // 날짜만 추출
+        boolean exists = myDiaryRepository.findByCreatedDateAndUserId(createdDate, dto.getUserId()).isPresent();
 
         if (exists) {
-            log.warn("이미 해당 날짜에 작성된 일기가 있습니다. - 날짜: {}, 유저ID: {}", createdAt.toLocalDate(), dto.getUserId());
-            throw new IllegalStateException("이미 해당 날짜에 작성된 일기가 존재합니다.");
+            log.warn("이미 해당 날짜에 작성된 일기가 있습니다. - 날짜: {}, 유저ID: {}", createdDate, dto.getUserId());
+            throw new IllegalStateException("이미 오늘 날짜에 작성된 일기가 존재합니다.");
         }
 
         MyDiaryEntity diary = MyDiaryEntity.builder()
