@@ -11,7 +11,7 @@ public class GptResponseParser {
 
     public static Map<String, String> extractFieldsFromResponse(String apiResponse) {
         try {
-            // 1. "choices"부터 "message"까지 수동으로 찾기
+            // 1. "choices"부터 "message"까지 찾기
             int messageIndex = apiResponse.indexOf("\"message\"");
             int contentIndex = apiResponse.indexOf("\"content\"", messageIndex);
 
@@ -39,7 +39,7 @@ public class GptResponseParser {
                 String key = line.substring(0, separatorIndex).trim();
                 String value = line.substring(separatorIndex + 1).trim();
 
-                // ⭐ 따옴표(")로 감싸져 있으면 따옴표 제거
+                // ⭐ 따옴표(")로 감싸져 있으면 제거
                 if (value.startsWith("\"") && value.endsWith("\"")) {
                     value = value.substring(1, value.length() - 1);
                 }
@@ -63,16 +63,15 @@ public class GptResponseParser {
         dto.setNegativeScore(parseIntSafe(parsedMap.get("부정 감정 점수")));
         dto.setTotalScore(parseIntSafe(parsedMap.get("총합 감정 점수")));
 
-        dto.setEmotion1(parsedMap.getOrDefault("대표 감정 1", ""));
-        dto.setEmotion2(parsedMap.getOrDefault("대표 감정 2", ""));
-        dto.setEmotion3(parsedMap.getOrDefault("대표 감정 3", ""));
+        // ⭐ 감정 누락 시 "없음" 기본값 세팅
+        dto.setEmotion1(defaultIfEmpty(parsedMap.get("대표 감정1")));
+        dto.setEmotion2(defaultIfEmpty(parsedMap.get("대표 감정2")));
+        dto.setEmotion3(defaultIfEmpty(parsedMap.get("대표 감정3")));
 
-        // ⭐ 일기 제목 처리
+        // ⭐ 일기 제목 누락/깨짐 시 오늘 날짜로 대체
         String title = parsedMap.get("일기 제목");
         if (title == null || title.trim().isEmpty() || title.equals("\\")) {
-            LocalDate now = LocalDate.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            title = now.format(formatter);
+            title = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         }
         dto.setDiaryTitle(title);
 
@@ -85,5 +84,12 @@ public class GptResponseParser {
         } catch (Exception e) {
             return 0;
         }
+    }
+
+    private static String defaultIfEmpty(String value) {
+        if (value == null || value.trim().isEmpty() || value.equals("\\")) {
+            return "없음";
+        }
+        return value;
     }
 }

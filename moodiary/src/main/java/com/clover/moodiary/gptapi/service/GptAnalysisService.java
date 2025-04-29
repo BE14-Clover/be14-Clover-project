@@ -3,7 +3,6 @@ package com.clover.moodiary.gptapi.service;
 import com.clover.moodiary.gptapi.command.dto.GptRequestDto;
 import com.clover.moodiary.gptapi.command.dto.GptResponseDto;
 import com.clover.moodiary.gptapi.external.GptApiClient;
-// import com.clover.moodiary.gptapi.service.GptResponseParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
