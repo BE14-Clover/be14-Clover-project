@@ -38,9 +38,8 @@ public class CommandActionServiceImpl implements CommandActionService {
 	}
 	
 	@Override
-	public void plusUserPreferences(int userId, int actionId) {
-		/* 설명. 가중치 +할 값 */
-		int plusValue = 10;
+	public void changeUserPreferences(int userId, int actionId, int changeValue) {
+
 		
 		List<TaggedRecommendedActionsDTO> taggedRecommendedActionsDTOList = actionService.getActionTagByActionId(actionId);
 		List<UserPreferencesDTO> userPreferencesDTOList = new ArrayList<>();
@@ -49,7 +48,7 @@ public class CommandActionServiceImpl implements CommandActionService {
 		/* 설명. 주어진 행동의 태그들을 가중치 추가한 채로 우선 리스트에 담기 */
 		while (!taggedRecommendedActionsDTOList.isEmpty()) {
 			upDTO = actionService.getUserPreferencesByActionTagId(userId, taggedRecommendedActionsDTOList.get(0).getActionTagId());
-			upDTO.setWeight(upDTO.getWeight() + plusValue);
+			upDTO.setWeight(upDTO.getWeight() + changeValue);
 			userPreferencesDTOList.add(upDTO);
 			taggedRecommendedActionsDTOList.remove(0);
 		}
@@ -66,7 +65,7 @@ public class CommandActionServiceImpl implements CommandActionService {
 			upDTO = actionService.getUserPreferencesByActionTagId(userId, atDTO.getId());
 			
 			if (upDTO != null) {
-				upDTO.setWeight(upDTO.getWeight() + plusValue);
+				upDTO.setWeight(upDTO.getWeight() + changeValue);
 				userPreferencesDTOList.add(upDTO);
 			}
 			index++;
@@ -75,13 +74,29 @@ public class CommandActionServiceImpl implements CommandActionService {
 		/* 설명. 리스트의 값들을 하나씩 DB에 반영 */
 		while (!userPreferencesDTOList.isEmpty()) {
 			upDTO = userPreferencesDTOList.get(0);
-			UserPreferences userPreferences = new UserPreferences();
-			userPreferences.setUserId(upDTO.getUserId());
-			userPreferences.setActionTagId(upDTO.getActionTagId());
-			userPreferences.setWeight(upDTO.getWeight());
-			userPreferences.setLastRecommendedAt(new java.util.Date());
-			userPreferencesRepository.save(userPreferences);
+			upDTOToUserPreferencesSave(upDTO);
 			userPreferencesDTOList.remove(0);
 		}
+	}
+	
+	@Override
+	public void excludeActionTagList(int userId, List<Integer> excludingActionTagList) {
+		for (int actionTagId : excludingActionTagList ) {
+			UserPreferencesDTO upDTO = new UserPreferencesDTO();
+			upDTO.setUserId(userId);
+			upDTO.setActionTagId(actionTagId);
+			upDTO.setWeight(0);
+			upDTO.setLastRecommendedAt(new java.util.Date());
+			upDTOToUserPreferencesSave(upDTO);
+		}
+	}
+	
+	private void upDTOToUserPreferencesSave(UserPreferencesDTO upDTO) {
+		UserPreferences userPreferences = new UserPreferences();
+		userPreferences.setUserId(upDTO.getUserId());
+		userPreferences.setActionTagId(upDTO.getActionTagId());
+		userPreferences.setWeight(upDTO.getWeight());
+		userPreferences.setLastRecommendedAt(new java.util.Date());
+		userPreferencesRepository.save(userPreferences);
 	}
 }

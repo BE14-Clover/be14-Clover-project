@@ -24,4 +24,6 @@ public interface ActionMapper {
 	List<ActionTagDTO> selectActionTagByParentActionId(int parentActionTagId);
 	
 	List<TaggedRecommendedActionsDTO> selectRecommendedActionIdByActionTagId(int randomActionTagId);
+	
+	List<ActionTagDTO> selectActionTagListByActionTagName(String keyword);
 }

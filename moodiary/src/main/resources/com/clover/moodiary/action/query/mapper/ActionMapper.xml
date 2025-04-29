@@ -67,6 +67,16 @@
         </if>
     </select>
 
+    <!-- 설명. 추천 행동 이름으로 비슷한 이름을 가진 추천 행동의 id 조회 -->
+    <select id="selectActionTagListByActionTagName" resultMap="ActionTagResultMap" parameterType="String">
+        SELECT
+               AT.ID
+             , AT.NAME
+             , AT.PARENT_ACTION_TAG_ID
+          FROM ACTION_TAG AT
+         WHERE AT.NAME LIKE CONCAT('%', #{keyword}, '%')
+    </select>
+
     <!-- 설명. 추천 행동 id로 행동 이름 조회 -->
     <select id="selectRecommendedActionById" resultMap="RecommendedActionResultMap" parameterType="_int">
         SELECT
