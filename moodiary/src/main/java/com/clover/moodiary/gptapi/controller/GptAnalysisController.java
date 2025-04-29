@@ -27,6 +27,7 @@
 package com.clover.moodiary.gptapi.controller;
 
 import com.clover.moodiary.gptapi.command.dto.GptRequestDto;
+import com.clover.moodiary.gptapi.command.dto.GptResponseDto;
 import com.clover.moodiary.gptapi.service.GptAnalysisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +41,7 @@ public class GptAnalysisController {
         private final GptAnalysisService gptAnalysisService;
 
         @PostMapping("/analyze")
-        public Mono<String> analyzeDiary(@RequestBody GptRequestDto gptRequestDto) {
-                return gptAnalysisService.analyzeDiary(gptRequestDto);
+        public Mono<GptResponseDto> analyzeDiary(@RequestBody GptRequestDto requestDto) {
+                return gptAnalysisService.analyzeDiary(requestDto);
         }
 }

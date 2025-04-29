@@ -1,25 +1,24 @@
 package com.clover.moodiary.gptapi.command.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class GptResponseDto {
-    private List<Choice> choices;
 
-    @Getter
-    @Setter
-    public static class Choice {
-        private Message message;
-    }
+    private int positiveScore; // 긍정 감정 점수
+    private int neutralScore; // 보통 감정 점수
+    private int negativeScore; // 부정 감정 점수
+    private int totalScore; // 총합 감정 점수
 
-    @Getter
-    @Setter
-    public static class Message {
-        private String role;
-        private String content;
-    }
+    private String emotion1; // 대표 감정 1
+    private String emotion2; // 대표 감정 2
+    private String emotion3; // 대표 감정 3
+
+    private String diaryTitle; // 일기 제목
 }

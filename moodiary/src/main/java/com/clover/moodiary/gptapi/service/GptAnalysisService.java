@@ -1,50 +1,46 @@
 package com.clover.moodiary.gptapi.service;
 
 import com.clover.moodiary.gptapi.command.dto.GptRequestDto;
+import com.clover.moodiary.gptapi.command.dto.GptResponseDto;
 import com.clover.moodiary.gptapi.external.GptApiClient;
+// import com.clover.moodiary.gptapi.service.GptResponseParser;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GptAnalysisService {
+
     private final GptApiClient gptApiClient;
 
-    public Mono<String> analyzeDiary(GptRequestDto gptRequestDto) {
+    public Mono<GptResponseDto> analyzeDiary(GptRequestDto gptRequestDto) {
         return gptApiClient.sendPrompt(gptRequestDto)
-            .doOnNext(result -> {
-                // 로그 찍기
-                System.out.println("GPT 결과: " + result);
-            });
+                .flatMap(response -> {
+                    // 1. GPT 응답 로깅
+                    log.info("[GPT Raw Response] {}", response);
+
+                    // 2. Content 파싱해서 Map 추출
+                    Map<String, String> parsedMap = GptResponseParser.extractFieldsFromResponse(response);
+
+                    if (parsedMap == null || parsedMap.isEmpty()) {
+                        log.error("[GPT Parsing Failed] Response: {}", response);
+                        return Mono.error(new RuntimeException("GPT 응답 파싱 실패"));
+                    }
+
+                    // 3. Map을 DTO로 변환
+                    GptResponseDto responseDto = GptResponseParser.toDto(parsedMap);
+
+                    // 4. 최종 DTO 반환
+                    return Mono.just(responseDto);
+                })
+                .onErrorResume(e -> {
+                    log.error("[GPT Analysis Error] {}", e.getMessage());
+                    return Mono.error(new RuntimeException("GPT 분석 중 오류 발생", e));
+                });
     }
 }
-
-// @Service
-// @RequiredArgsConstructor
-// public class GptAnalysisService {
-
-//     private final GptApiClient gptApiClient;
-//     private static final Logger logger = LoggerFactory.getLogger(GptAnalysisService.class);
-
-//     /**
-//      * 일기 분석을 위해 GPT API에 요청을 보내는 메서드
-//      * 
-//      * @param gptRequestDto GPT 요청 데이터를 담은 DTO
-//      * @return Mono<String> 비동기적으로 처리된 GPT 응답
-//      */
-//     public Mono<String> analyzeDiary(GptRequestDto gptRequestDto) {
-//         // 요청 데이터 로깅
-//         logger.info("GPT 분석 요청: {}", gptRequestDto);
-
-//         return gptApiClient.sendPrompt(gptRequestDto)
-//                 .doOnTerminate(() -> logger.info("GPT 요청 처리 완료"))
-//                 .onErrorResume(e -> {
-//                     // 오류 처리 및 로깅
-//                     logger.error("GPT 요청 실패: {}", e.getMessage());
-//                     return Mono.empty(); // 오류 발생 시 빈 Mono 반환
-//                 });
-//     }
-// }
