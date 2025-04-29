@@ -16,7 +16,7 @@
         <result property="styleLayer" column="style_layer" />
         <result property="userId" column="user_id" />
 
-        <association property="diaryEmotion" javaType="com.clover.moodiary.myDiary.query.dto.MyDiaryEmotionDTO">
+        <association property="myDiaryEmotion" javaType="com.clover.moodiary.myDiary.query.dto.MyDiaryEmotionDTO">
             <id property="id" column="emotion_id" />
             <result property="positiveScore" column="positive_score" />
             <result property="neutralScore" column="neutral_score" />
@@ -81,8 +81,8 @@
              , b.emotion_summary1
              , b.emotion_summary2
              , b.emotion_summary3
-          FROM diary a
-          JOIN emotion_analyze b ON a.id = b.diary_id
+          FROM my_diary a
+          JOIN emotion_analyze b ON a.id = b.my_diary_id
          WHERE a.user_id = #{userId}
            AND a.is_deleted = 'N'
            AND DATE_FORMAT(a.created_at, '%Y-%m') = #{targetMonth}
@@ -98,8 +98,8 @@
              , a.created_at
              , a.is_confirmed
              , b.total_score
-        FROM diary a
-                 JOIN emotion_analyze b ON a.id = b.diary_id
+        FROM my_diary a
+                 JOIN emotion_analyze b ON a.id = b.my_diary_id
         WHERE a.user_id = #{userId}
           AND a.is_deleted = 'N'
           AND a.created_at >= #{startDate}
