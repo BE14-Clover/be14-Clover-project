@@ -6,13 +6,14 @@ DROP TABLE IF EXISTS user_pet CASCADE;
 DROP TABLE IF EXISTS pet CASCADE;
 DROP TABLE IF EXISTS emotion_analyze CASCADE;
 DROP TABLE IF EXISTS picture CASCADE;
-DROP TABLE IF EXISTS diary_tag CASCADE;
+DROP TABLE IF EXISTS my_diary_tag CASCADE;
 DROP TABLE IF EXISTS tag CASCADE;
 DROP TABLE IF EXISTS sticker CASCADE;
-DROP TABLE IF EXISTS diary CASCADE;
+DROP TABLE IF EXISTS my_diary CASCADE;
 DROP TABLE IF EXISTS shared_diary_comment CASCADE;
 DROP TABLE IF EXISTS shared_diary CASCADE;
 DROP TABLE IF EXISTS shared_diary_room CASCADE;
+DROP TABLE IF EXISTS moodlog CASCADE;
 DROP TABLE IF EXISTS user CASCADE;
 DROP TABLE IF EXISTS register_questions CASCADE;
 DROP TABLE IF EXISTS ACTION_TAG CASCADE;
@@ -46,8 +47,20 @@ CREATE TABLE user
         REFERENCES register_questions (id)
 );
 
+CREATE TABLE IF NOT EXISTS moodlog
+(
+    id      INT      NOT NULL AUTO_INCREMENT,
+    content TEXT     NOT NULL,
+    month   DATETIME NOT NULL,
+    user_id INT      NOT NULL,
+    CONSTRAINT pk_moodlog PRIMARY KEY (id),
+    CONSTRAINT fk_moodlog_user_id FOREIGN KEY (user_id) REFERENCES user (id)
+) ENGINE = INNODB
+  AUTO_INCREMENT = 1 COMMENT ='개인 월간 기록'
+  DEFAULT CHARSET UTF8;
 
-CREATE TABLE IF NOT EXISTS diary
+
+CREATE TABLE IF NOT EXISTS my_diary
 (
     id           INT          NOT NULL AUTO_INCREMENT,
     title        VARCHAR(255) NULL COMMENT '제목 없으면 해당 날짜 DATE 형식으로 작성됨',
@@ -57,8 +70,8 @@ CREATE TABLE IF NOT EXISTS diary
     is_confirmed VARCHAR(4)   NOT NULL DEFAULT 'N' COMMENT '확정 Y, 확정 N (04시에 스케줄러로 일괄처리)',
     style_layer  TEXT         NULL,
     user_id      INT          NOT NULL,
-    CONSTRAINT pk_diary_id PRIMARY KEY (id),
-    CONSTRAINT fk_diary_user_id FOREIGN KEY (user_id) REFERENCES user (id)
+    CONSTRAINT pk_my_diary_id PRIMARY KEY (id),
+    CONSTRAINT fk_my_diary_user_id FOREIGN KEY (user_id) REFERENCES user (id)
 );
 
 
@@ -72,10 +85,10 @@ CREATE TABLE IF NOT EXISTS emotion_analyze
     emotion_summary1 VARCHAR(255) NOT NULL,
     emotion_summary2 VARCHAR(255) NOT NULL,
     emotion_summary3 VARCHAR(255) NOT NULL,
-    diary_summary    VARCHAR(255) NOT NULL,
-    diary_id         INT          NOT NULL,
+    my_diary_summary VARCHAR(255) NOT NULL,
+    my_diary_id      INT          NOT NULL,
     CONSTRAINT pk_emotion_analyze_id PRIMARY KEY (id),
-    CONSTRAINT fk_emotion_analyze_diary_id FOREIGN KEY (diary_id) REFERENCES diary (id)
+    CONSTRAINT fk_emotion_analyze_my_diary_id FOREIGN KEY (my_diary_id) REFERENCES my_diary (id)
 );
 
 
@@ -87,13 +100,13 @@ CREATE TABLE IF NOT EXISTS tag
 );
 
 
-CREATE TABLE IF NOT EXISTS diary_tag
+CREATE TABLE IF NOT EXISTS my_diary_tag
 (
-    diary_id INT NOT NULL,
-    tag_id   INT NOT NULL,
-    CONSTRAINT pk_diary_tag PRIMARY KEY (diary_id, tag_id),
-    CONSTRAINT fk_diary_tag_diary_id FOREIGN KEY (diary_id) REFERENCES diary (id),
-    CONSTRAINT fk_diary_tag_tag_id FOREIGN KEY (tag_id) REFERENCES tag (id)
+    my_diary_id INT NOT NULL,
+    tag_id      INT NOT NULL,
+    CONSTRAINT pk_my_diary_tag PRIMARY KEY (my_diary_id, tag_id),
+    CONSTRAINT fk_my_diary_tag_my_diary_id FOREIGN KEY (my_diary_id) REFERENCES my_diary (id),
+    CONSTRAINT fk_my_diary_tag_tag_id FOREIGN KEY (tag_id) REFERENCES tag (id)
 );
 
 
@@ -143,10 +156,10 @@ CREATE TABLE IF NOT EXISTS picture
 (
     id              INT  NOT NULL AUTO_INCREMENT,
     image_path      TEXT NOT NULL,
-    diary_id        INT  NULL,
+    my_diary_id     INT  NULL,
     shared_diary_id INT  NULL,
     CONSTRAINT pk_picture_id PRIMARY KEY (id),
-    CONSTRAINT fk_picture_diary_id FOREIGN KEY (diary_id) REFERENCES diary (id) ON DELETE CASCADE,
+    CONSTRAINT fk_picture_my_diary_id FOREIGN KEY (my_diary_id) REFERENCES my_diary (id) ON DELETE CASCADE,
     CONSTRAINT fk_picture_shared_diary_id FOREIGN KEY (shared_diary_id) REFERENCES shared_diary (id) ON DELETE CASCADE
 );
 
