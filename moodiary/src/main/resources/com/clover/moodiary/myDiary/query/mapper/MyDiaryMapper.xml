@@ -82,7 +82,7 @@
              , b.emotion_summary2
              , b.emotion_summary3
           FROM my_diary a
-          JOIN emotion_analyze b ON a.id = b.my_diary_id
+          LEFT JOIN emotion_analyze b ON a.id = b.my_diary_id
          WHERE a.user_id = #{userId}
            AND a.is_deleted = 'N'
            AND DATE_FORMAT(a.created_at, '%Y-%m') = #{targetMonth}

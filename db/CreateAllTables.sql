@@ -94,8 +94,8 @@ CREATE TABLE IF NOT EXISTS emotion_analyze
 
 CREATE TABLE IF NOT EXISTS tag
 (
-    id       INT          NOT NULL,
-    tag_name VARCHAR(255) NOT NULL,
+    id       INT          NOT NULL AUTO_INCREMENT,
+    tag_name VARCHAR(255) NOT NULL UNIQUE,
     CONSTRAINT pk_tag_id PRIMARY KEY (id)
 );
 
