@@ -1,5 +1,6 @@
 package com.clover.moodiary.shareddiary.query.service;
 
+import com.clover.moodiary.shareddiary.query.dto.SharedDiaryDetailResponse;
 import com.clover.moodiary.shareddiary.query.dto.SharedDiaryResponse;
 import com.clover.moodiary.shareddiary.query.mapper.SharedDiaryMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,5 +21,10 @@ public class SharedDiaryServiceImpl implements SharedDiaryService {
     @Override
     public List<SharedDiaryResponse> findDiaryByRoomId(Integer roomId) {
         return sharedDiaryMapper.findDiaryByRoomId(roomId);
+    }
+
+    @Override
+    public SharedDiaryDetailResponse findDiaryById(Integer diaryId) {
+        return sharedDiaryMapper.findDiaryById(diaryId);
     }
 }

@@ -20,4 +20,17 @@
         ORDER BY created_at DESC
     </select>
 
+    <select id="findDiaryById" resultType="com.clover.moodiary.shareddiary.query.dto.SharedDiaryDetailResponse">
+        SELECT
+            id,
+            title,
+            content,
+            DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS createdAt,
+            is_deleted AS isDeleted,
+            fixed_state AS fixedState,
+            user_id AS userId,
+            style_layer AS styleLayer
+        FROM shared_diary
+        WHERE id = #{diaryId}
+    </select>
 </mapper>
