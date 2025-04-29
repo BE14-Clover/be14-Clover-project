@@ -1,75 +1,61 @@
 package com.clover.moodiary.gptapi.service;
 
+import com.clover.moodiary.gptapi.command.dto.GptResponseDto;
+import com.clover.moodiary.gptapi.config.OpenAiKeysConfig;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedHashMap;
 import java.util.Map;
-
-import com.clover.moodiary.gptapi.command.dto.GptResponseDto;
 
 public class GptResponseParser {
 
+    // private static final ObjectMapper objectMapper = new ObjectMapper();
+
     public static Map<String, String> extractFieldsFromResponse(String apiResponse) {
         try {
-            // 1. "choices"부터 "message"까지 찾기
-            int messageIndex = apiResponse.indexOf("\"message\"");
-            int contentIndex = apiResponse.indexOf("\"content\"", messageIndex);
+            ObjectMapper objectMapper = new ObjectMapper();
 
-            int colonIndex = apiResponse.indexOf(":", contentIndex);
-            int firstQuoteIndex = apiResponse.indexOf("\"", colonIndex + 1);
-            int lastQuoteIndex = apiResponse.indexOf("\"", firstQuoteIndex + 1);
+            // 1. 전체 응답 파싱
+            JsonNode root = objectMapper.readTree(apiResponse);
+            JsonNode contentNode = root.path("choices").get(0).path("message").path("content");
 
-            String content = apiResponse.substring(firstQuoteIndex + 1, lastQuoteIndex);
-
-            // 2. 줄 단위로 자르기
-            String[] lines = content.split("\\\\n");
-
-            // 3. 줄별로 파싱
-            Map<String, String> result = new LinkedHashMap<>();
-
-            for (String line : lines) {
-                line = line.trim();
-                if (line.isEmpty())
-                    continue;
-
-                int separatorIndex = line.indexOf(":");
-                if (separatorIndex == -1)
-                    continue;
-
-                String key = line.substring(0, separatorIndex).trim();
-                String value = line.substring(separatorIndex + 1).trim();
-
-                // ⭐ 따옴표(")로 감싸져 있으면 제거
-                if (value.startsWith("\"") && value.endsWith("\"")) {
-                    value = value.substring(1, value.length() - 1);
-                }
-
-                result.put(key, value);
+            if (contentNode.isMissingNode() || contentNode.isNull()) {
+                throw new RuntimeException("GPT 응답에서 content를 찾을 수 없습니다.");
             }
 
-            return result;
+            // 2. content: 줄바꿈/탭/여러 공백 제거 후 깨끗한 JSON String으로 정리
+            String rawJson = contentNode.asText();
+            String cleanedJson = rawJson
+                    .replaceAll("\\\\n", "") // 이스케이프된 줄바꿈 제거
+                    .replaceAll("\\\\r", "") // 이스케이프된 캐리지리턴 제거
+                    .replaceAll("\\s{2,}", " ") // 여러 개 공백을 하나로 줄이기
+                    .trim();
 
+            // 3. 다시 Map으로 변환
+            return objectMapper.readValue(cleanedJson, new TypeReference<Map<String, String>>() {
+            });
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            throw new GptAnalysisException("GPT 응답 파싱 실패", e);
         }
     }
 
-    public static GptResponseDto toDto(Map<String, String> parsedMap) {
+    public static GptResponseDto toDto(Map<String, String> parsedMap, OpenAiKeysConfig keys) {
         GptResponseDto dto = new GptResponseDto();
 
-        dto.setPositiveScore(parseIntSafe(parsedMap.get("긍정 감정 점수")));
-        dto.setNeutralScore(parseIntSafe(parsedMap.get("보통 감정 점수")));
-        dto.setNegativeScore(parseIntSafe(parsedMap.get("부정 감정 점수")));
-        dto.setTotalScore(parseIntSafe(parsedMap.get("총합 감정 점수")));
+        dto.setPositiveScore(parseIntSafe(parsedMap.getOrDefault(keys.getPositiveScore(), "0")));
+        dto.setNeutralScore(parseIntSafe(parsedMap.getOrDefault(keys.getNeutralScore(), "0")));
+        dto.setNegativeScore(parseIntSafe(parsedMap.getOrDefault(keys.getNegativeScore(), "0")));
+        dto.setTotalScore(parseIntSafe(parsedMap.getOrDefault(keys.getTotalScore(), "0")));
 
-        // ⭐ 감정 누락 시 "없음" 기본값 세팅
-        dto.setEmotion1(defaultIfEmpty(parsedMap.get("대표 감정1")));
-        dto.setEmotion2(defaultIfEmpty(parsedMap.get("대표 감정2")));
-        dto.setEmotion3(defaultIfEmpty(parsedMap.get("대표 감정3")));
+        dto.setEmotion1(defaultIfEmpty(parsedMap.get(keys.getEmotion1())));
+        dto.setEmotion2(defaultIfEmpty(parsedMap.get(keys.getEmotion2())));
+        dto.setEmotion3(defaultIfEmpty(parsedMap.get(keys.getEmotion3())));
 
-        // ⭐ 일기 제목 누락/깨짐 시 오늘 날짜로 대체
-        String title = parsedMap.get("일기 제목");
+        String title = parsedMap.get(keys.getDiaryTitle());
         if (title == null || title.trim().isEmpty() || title.equals("\\")) {
             title = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         }
@@ -87,9 +73,6 @@ public class GptResponseParser {
     }
 
     private static String defaultIfEmpty(String value) {
-        if (value == null || value.trim().isEmpty() || value.equals("\\")) {
-            return "없음";
-        }
-        return value;
+        return (value == null || value.trim().isEmpty() || value.equals("\\")) ? "없음" : value;
     }
 }
