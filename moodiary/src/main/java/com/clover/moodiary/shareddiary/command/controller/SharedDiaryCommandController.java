@@ -1,9 +1,6 @@
 package com.clover.moodiary.shareddiary.command.controller;
 
-import com.clover.moodiary.shareddiary.command.dto.CreateSharedDiaryRequest;
-import com.clover.moodiary.shareddiary.command.dto.CreateSharedDiaryResponse;
-import com.clover.moodiary.shareddiary.command.dto.UpdateSharedDiaryReponse;
-import com.clover.moodiary.shareddiary.command.dto.UpdateSharedDiaryRequest;
+import com.clover.moodiary.shareddiary.command.dto.*;
 import com.clover.moodiary.shareddiary.command.service.SharedDiaryCommandService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,4 +24,10 @@ public class SharedDiaryCommandController {
         UpdateSharedDiaryReponse response = sharedDiaryCommandService.updateDiary(request);
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/delete")
+    public ResponseEntity<DeleteSharedDiaryResponse> deleteDiary(@RequestBody DeleteSharedDiaryRequest request) {
+        return ResponseEntity.ok(sharedDiaryCommandService.deleteDiary(request));
+    }
+
 }

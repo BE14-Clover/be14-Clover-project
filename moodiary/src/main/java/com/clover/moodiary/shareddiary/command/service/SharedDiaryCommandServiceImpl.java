@@ -1,9 +1,6 @@
 package com.clover.moodiary.shareddiary.command.service;
 
-import com.clover.moodiary.shareddiary.command.dto.CreateSharedDiaryRequest;
-import com.clover.moodiary.shareddiary.command.dto.CreateSharedDiaryResponse;
-import com.clover.moodiary.shareddiary.command.dto.UpdateSharedDiaryReponse;
-import com.clover.moodiary.shareddiary.command.dto.UpdateSharedDiaryRequest;
+import com.clover.moodiary.shareddiary.command.dto.*;
 import com.clover.moodiary.shareddiary.command.entity.SharedDiary;
 import com.clover.moodiary.shareddiary.command.repository.SharedDiaryRepository;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +48,17 @@ public class SharedDiaryCommandServiceImpl implements SharedDiaryCommandService 
         diary.setStyleLayer(request.getStyleLayer());
 
         return new UpdateSharedDiaryReponse(diary.getId());
+    }
+
+    @Override
+    @Transactional
+    public DeleteSharedDiaryResponse deleteDiary(DeleteSharedDiaryRequest request) {
+        SharedDiary diary = sharedDiaryRepository.findById(request.getDiaryId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 일기입니다."));
+
+        diary.setIsDeleted("Y");
+
+        return new DeleteSharedDiaryResponse(diary.getId());
     }
 
 

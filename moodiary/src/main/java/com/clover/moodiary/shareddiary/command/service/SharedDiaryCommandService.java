@@ -1,12 +1,11 @@
 package com.clover.moodiary.shareddiary.command.service;
 
-import com.clover.moodiary.shareddiary.command.dto.CreateSharedDiaryRequest;
-import com.clover.moodiary.shareddiary.command.dto.CreateSharedDiaryResponse;
-import com.clover.moodiary.shareddiary.command.dto.UpdateSharedDiaryReponse;
-import com.clover.moodiary.shareddiary.command.dto.UpdateSharedDiaryRequest;
+import com.clover.moodiary.shareddiary.command.dto.*;
 
 public interface SharedDiaryCommandService {
     CreateSharedDiaryResponse createDiary(CreateSharedDiaryRequest request);
 
     UpdateSharedDiaryReponse updateDiary(UpdateSharedDiaryRequest request);
+
+    DeleteSharedDiaryResponse deleteDiary(DeleteSharedDiaryRequest request);
 }
