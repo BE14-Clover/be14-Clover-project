@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.clover.moodiary.shareddiaryroom.query.mapper.SharedDiaryRoomMapper">
+
+    <select id="findRoomByUserId" resultType="com.clover.moodiary.shareddiaryroom.query.dto.SharedDiaryRoomResponse">
+        SELECT
+               id,
+               user_id1 AS userId1,
+               user_id2 AS userId2
+          FROM shared_diary_room
+         WHERE user_id1 = #{userId}
+            OR user_id2 = #{userId}
+    </select>
+
+</mapper>
