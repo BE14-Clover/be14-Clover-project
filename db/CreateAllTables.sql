@@ -94,8 +94,8 @@ CREATE TABLE IF NOT EXISTS emotion_analyze
 
 CREATE TABLE IF NOT EXISTS tag
 (
-    id       INT          NOT NULL,
-    tag_name VARCHAR(255) NOT NULL,
+    id       INT          NOT NULL AUTO_INCREMENT,
+    tag_name VARCHAR(255) NOT NULL UNIQUE,
     CONSTRAINT pk_tag_id PRIMARY KEY (id)
 );
 
@@ -113,8 +113,8 @@ CREATE TABLE IF NOT EXISTS my_diary_tag
 CREATE TABLE shared_diary_room
 (
     id       INT AUTO_INCREMENT COMMENT '공유 일기 방 id',
-    user_id1 INT NOT NULL      COMMENT '유저 id1',
-    user_id2 INT NOT NULL      COMMENT '유저 id2',
+    user_id1 INT NOT NULL       COMMENT '유저 id1',
+    user_id2 INT NULL           COMMENT '유저 id2',
     CONSTRAINT pk_shared_diary_room_id PRIMARY KEY (id),
     CONSTRAINT fk_shared_diary_room_user_id1 FOREIGN KEY (user_id1) REFERENCES user (id),
     CONSTRAINT fk_shared_diary_room_user_id2 FOREIGN KEY (user_id2) REFERENCES user (id)
