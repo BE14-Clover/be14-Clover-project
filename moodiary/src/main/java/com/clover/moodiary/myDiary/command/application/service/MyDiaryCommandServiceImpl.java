@@ -1,22 +1,15 @@
 package com.clover.moodiary.myDiary.command.application.service;
 
 import com.clover.moodiary.myDiary.command.application.dto.MyDiaryCommandDTO;
-import com.clover.moodiary.myDiary.command.domain.aggregate.entity.MyDiaryEntity;
-import com.clover.moodiary.myDiary.command.domain.aggregate.entity.MyDiaryTagEntity;
-import com.clover.moodiary.myDiary.command.domain.aggregate.entity.MyDiaryTagId;
-import com.clover.moodiary.myDiary.command.domain.aggregate.entity.TagEntity;
-import com.clover.moodiary.myDiary.command.domain.repository.EmotionAnalysisRepository;
-import com.clover.moodiary.myDiary.command.domain.repository.MyDiaryRepository;
-import com.clover.moodiary.myDiary.command.domain.repository.MyDiaryTagRepository;
-import com.clover.moodiary.myDiary.command.domain.repository.TagRepository;
+import com.clover.moodiary.myDiary.command.application.dto.MoodlogDTO;
+import com.clover.moodiary.myDiary.command.domain.aggregate.entity.*;
+import com.clover.moodiary.myDiary.command.domain.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 
 @Service
 @Slf4j
@@ -25,20 +18,23 @@ public class MyDiaryCommandServiceImpl implements MyDiaryCommandService {
     private final MyDiaryRepository myDiaryRepository;
     private final TagRepository tagRepository;
     private final MyDiaryTagRepository myDiaryTagRepository;
+    private final MoodlogRepository moodlogRepository;
 
     @Autowired
     public MyDiaryCommandServiceImpl(MyDiaryRepository myDiaryRepository,
                                      TagRepository tagRepository,
-                                     MyDiaryTagRepository myDiaryTagRepository) {
+                                     MyDiaryTagRepository myDiaryTagRepository,
+                                     MoodlogRepository moodlogRepository) {
         this.myDiaryRepository = myDiaryRepository;
         this.tagRepository = tagRepository;
         this.myDiaryTagRepository = myDiaryTagRepository;
+        this.moodlogRepository = moodlogRepository;
     }
 
     @Transactional
     @Override
     public void registDiary(MyDiaryCommandDTO dto) {
-        LocalDate createdDate = dto.getCreatedAt().toLocalDate(); // 날짜만 추출
+        LocalDate createdDate = dto.getCreatedAt().toLocalDate();
         boolean exists = myDiaryRepository.findByCreatedDateAndUserId(createdDate, dto.getUserId()).isPresent();
 
         if (exists) {
@@ -75,5 +71,26 @@ public class MyDiaryCommandServiceImpl implements MyDiaryCommandService {
             myDiaryTagRepository.save(diaryTag);
             log.info("태그 연결 저장 - DiaryID: {}, TagID: {}", diary.getId(), tag.getId());
         }
+    }
+
+    @Transactional
+    @Override
+    public void saveMoodlog(MoodlogDTO dto) {
+        LocalDate month = LocalDate.now().withDayOfMonth(1);
+
+        boolean exists = moodlogRepository.existsByUserIdAndMonth(dto.getUserId(), month);
+        if (exists) {
+            log.warn("이미 등록된 moodlog가 있습니다. - 유저ID: {}, 월: {}", dto.getUserId(), month);
+            throw new IllegalStateException("이미 이번 달의 moodlog가 존재합니다.");
+        }
+
+        MoodlogEntity moodlog = MoodlogEntity.builder()
+                .userId(dto.getUserId())
+                .content(dto.getContent())
+                .month(month)
+                .build();
+
+        moodlogRepository.save(moodlog);
+        log.info("Moodlog 저장 완료 - ID: {}, 유저ID: {}, 월: {}", moodlog.getId(), dto.getUserId(), month);
     }
 }

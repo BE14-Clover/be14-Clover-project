@@ -1,6 +1,7 @@
 package com.clover.moodiary.myDiary.command.application.controller;
 
 
+import com.clover.moodiary.myDiary.command.application.dto.MoodlogDTO;
 import com.clover.moodiary.myDiary.command.application.dto.MyDiaryCommandDTO;
 import com.clover.moodiary.myDiary.command.application.service.MyDiaryCommandService;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,12 @@ public class MyDiaryCommandController {
             log.warn("일기 등록 실패: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
+    }
+
+    @PostMapping("/moodlog")
+    public ResponseEntity<?> registMoodlog(@RequestBody MoodlogDTO moodlogDTO) {
+        myDiaryCommandService.saveMoodlog(moodlogDTO);
+        return ResponseEntity.ok("Moodlog 등록이 완료되었습니다.");
     }
 
 
