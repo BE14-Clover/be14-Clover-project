@@ -84,6 +84,6 @@ public class SharedDiaryCommandServiceTest {
         SharedDiary deleteDiary = sharedDiaryRepository.findById(diaryId).orElse(null);
         Assertions.assertNotNull(deleteDiary);
         Assertions.assertEquals("Y",deleteDiary.getIsDeleted());
-        
+
     }
 }
