@@ -26,15 +26,30 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
+			// CSRF 비활성화 (stateless API 용)
 			.csrf(csrf -> csrf.disable())
-			.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/user/command/login", "/user/command/register", "/user/command/reset-password").permitAll()
-				.anyRequest().authenticated()
+			// 세션을 생성하지 않도록 설정
+			.sessionManagement(sm -> sm
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			)
-			// JWT 필터를 사용자명/암호 필터 전에 끼워 넣음
-			.addFilterBefore(new JwtAuthenticationFilter(jwtUtil),
-				org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
+			// 엔드포인트별 권한 설정
+			.authorizeHttpRequests(auth -> auth
+				// 로그인·가입·비밀번호 재설정 관련 경로는 모두 허용
+				.requestMatchers(
+					"/user/command/login",
+					"/user/command/register",
+					"/user/command/reset-password/**"  // GET/POST 모두 허용
+				).permitAll()
+				// 그 외 모든 요청은 인증 필요
+				/* 일단 모든 요청에 대해 권한 필요 없게 설정해놨음. */
+				.anyRequest().permitAll()
+			)
+			// JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
+			.addFilterBefore(
+				new JwtAuthenticationFilter(jwtUtil),
+				org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class
+			)
+			// 기본 HTTP Basic 은 그대로 두되, 주로 JWT 만 사용
 			.httpBasic(Customizer.withDefaults());
 
 		return http.build();
