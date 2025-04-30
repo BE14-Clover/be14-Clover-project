@@ -1,4 +1,5 @@
-package com.clover.moodiary.shareddiary.query.entity;
+package com.clover.moodiary.shareddiary.command.entity;
+
 
 import jakarta.persistence.*;
 import lombok.Getter;

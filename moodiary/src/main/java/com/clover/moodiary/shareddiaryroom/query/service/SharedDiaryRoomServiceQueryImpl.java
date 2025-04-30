@@ -8,12 +8,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class SharedDiaryRoomServiceImpl implements SharedDiaryRoomService {
+public class SharedDiaryRoomServiceQueryImpl implements SharedDiaryRoomQueryService {
 
     private final SharedDiaryRoomMapper sharedDiaryRoomMapper;
 
     @Autowired
-    public SharedDiaryRoomServiceImpl(SharedDiaryRoomMapper sharedDiaryRoomMapper) {
+    public SharedDiaryRoomServiceQueryImpl(SharedDiaryRoomMapper sharedDiaryRoomMapper) {
         this.sharedDiaryRoomMapper = sharedDiaryRoomMapper;
     }
 
