@@ -1,6 +1,7 @@
 package com.clover.moodiary.myDiary.command.application.controller;
 
 
+import com.clover.moodiary.myDiary.command.application.dto.EmotionAnalysisDTO;
 import com.clover.moodiary.myDiary.command.application.dto.MoodlogDTO;
 import com.clover.moodiary.myDiary.command.application.dto.MyDiaryCommandDTO;
 import com.clover.moodiary.myDiary.command.application.service.MyDiaryCommandService;
@@ -32,6 +33,23 @@ public class MyDiaryCommandController {
         } catch (IllegalStateException e) {
             log.warn("일기 등록 실패: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/registEmotion")
+    public ResponseEntity<?> registEmotion(@RequestBody EmotionAnalysisDTO emotionAnalysisDTO) {
+        try {
+            myDiaryCommandService.saveEmotionAnalysis(emotionAnalysisDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        } catch (IllegalArgumentException e) {
+            log.warn("요청 데이터 오류: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (EntityNotFoundException e) {
+            log.warn("해당 ID의 일기를 찾을 수 없습니다. ID: {}", emotionAnalysisDTO.getMyDiaryId());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            log.error("감정 분석 저장 중 서버 오류", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("감정 분석 저장 중 오류 발생");
         }
     }
 

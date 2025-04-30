@@ -1,5 +1,6 @@
 package com.clover.moodiary.myDiary.command.application.service;
 
+import com.clover.moodiary.myDiary.command.application.dto.EmotionAnalysisDTO;
 import com.clover.moodiary.myDiary.command.application.dto.MyDiaryCommandDTO;
 import com.clover.moodiary.myDiary.command.application.dto.MoodlogDTO;
 import com.clover.moodiary.myDiary.command.domain.aggregate.entity.*;
@@ -22,16 +23,20 @@ public class MyDiaryCommandServiceImpl implements MyDiaryCommandService {
     private final TagRepository tagRepository;
     private final MyDiaryTagRepository myDiaryTagRepository;
     private final MoodlogRepository moodlogRepository;
+    private final EmotionAnalysisRepository emotionAnalysisRepository;
 
     @Autowired
     public MyDiaryCommandServiceImpl(MyDiaryRepository myDiaryRepository,
                                      TagRepository tagRepository,
                                      MyDiaryTagRepository myDiaryTagRepository,
-                                     MoodlogRepository moodlogRepository) {
+                                     MoodlogRepository moodlogRepository,
+                                     EmotionAnalysisRepository emotionAnalysisRepository
+    ) {
         this.myDiaryRepository = myDiaryRepository;
         this.tagRepository = tagRepository;
         this.myDiaryTagRepository = myDiaryTagRepository;
         this.moodlogRepository = moodlogRepository;
+        this.emotionAnalysisRepository = emotionAnalysisRepository;
     }
 
     @Transactional
@@ -155,4 +160,40 @@ public class MyDiaryCommandServiceImpl implements MyDiaryCommandService {
             throw e; // 롤백
         }
     }
+
+    // 감정 분석 저장
+    public void saveEmotionAnalysis(EmotionAnalysisDTO dto) {
+        if (dto == null || dto.getMyDiaryId() == null) {
+            throw new IllegalArgumentException("Emotion data or Diary ID must not be null");
+        }
+
+        log.info("== 감정 분석 저장 요청 도착 ==");
+        log.info("positiveScore: {}", dto.getPositiveScore());
+        log.info("neutralScore: {}", dto.getNeutralScore());
+        log.info("negativeScore: {}", dto.getNegativeScore());
+        log.info("totalScore: {}", dto.getTotalScore());
+        log.info("emotionSummary1: {}", dto.getEmotionSummary1());
+        log.info("emotionSummary2: {}", dto.getEmotionSummary2());
+        log.info("emotionSummary3: {}", dto.getEmotionSummary3());
+        log.info("myDiarySummary: {}", dto.getMyDiarySummary());
+        log.info("myDiaryId: {}", dto.getMyDiaryId());
+
+        MyDiaryEntity diary = myDiaryRepository.findById(dto.getMyDiaryId())
+                .orElseThrow(() -> new EntityNotFoundException("일기 ID가 존재하지 않음: " + dto.getMyDiaryId()));
+
+        EmotionAnalysisEntity entity = EmotionAnalysisEntity.builder()
+                .totalScore(dto.getTotalScore())
+                .positiveScore(dto.getPositiveScore())
+                .neutralScore(dto.getNeutralScore())
+                .negativeScore(dto.getNegativeScore())
+                .emotionSummary1(dto.getEmotionSummary1())
+                .emotionSummary2(dto.getEmotionSummary2())
+                .emotionSummary3(dto.getEmotionSummary3())
+                .myDiarySummary(dto.getMyDiarySummary())
+                .myDiaryEntity(diary)
+                .build();
+
+        emotionAnalysisRepository.save(entity);
+    }
+
 }

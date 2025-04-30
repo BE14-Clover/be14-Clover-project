@@ -13,10 +13,10 @@ public class EmotionAnalysisDTO {
     private Integer neutralScore;
     private Integer negativeScore;
     private Integer totalScore;
-    private String emotionalSummary1;
-    private String emotionalSummary2;
-    private String emotionalSummary3;
-    private String diarySummary;
+    private String emotionSummary1;
+    private String emotionSummary2;
+    private String emotionSummary3;
+    private String myDiarySummary;
 
     private Integer myDiaryId;
 
