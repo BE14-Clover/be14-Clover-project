@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "emotion_analysis")
+@Table(name = "emotion_analyze")
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Builder
@@ -35,8 +35,8 @@ public class EmotionAnalysisEntity {
     @Column(name = "emotion_summary3", nullable = false)
     private String emotionSummary3;
 
-    @Column(name = "diary_summary", nullable = false)
-    private String diarySummary;
+    @Column(name = "my_diary_summary", nullable = false)
+    private String myDiarySummary;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "my_diary_id", nullable = false)

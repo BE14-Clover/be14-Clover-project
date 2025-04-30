@@ -11,15 +11,15 @@ import java.util.List;
 @Setter
 @ToString
 public class MyDiaryDTO {
-    private int id;
+    private Integer id;
     private String title;
     private String content;
     private LocalDateTime createdAt;
     private String isDeleted;
     private String isConfirmed;
     private String styleLayer;
-    private int userId;
+    private Integer userId;
 
     private List<String> tags;
-    private MyDiaryEmotionDTO diaryEmotion;
+    private MyDiaryEmotionDTO myDiaryEmotion;
 }

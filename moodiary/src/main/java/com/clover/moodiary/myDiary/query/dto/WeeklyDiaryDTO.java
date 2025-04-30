@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 public class WeeklyDiaryDTO {
-    private int id;
+    private Integer id;
     private String title;
     private String content;
     private LocalDateTime createdAt;
     private String isConfirmed;
-    private int totalScore;
+    private Integer totalScore;
 }

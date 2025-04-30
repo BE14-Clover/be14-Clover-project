@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @ToString
 public class MyDiaryCommandDTO {
-    private int id;
+    private Integer id;
     private String title;
     private String content;
 
@@ -22,6 +22,6 @@ public class MyDiaryCommandDTO {
     private String isDeleted;
     private String isConfirmed;
     private String styleLayer;
-    private int userId;
+    private Integer userId;
     private List<String> tags;
 }

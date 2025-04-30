@@ -8,9 +8,9 @@ import lombok.*;
 @Setter
 @ToString
 public class MoodlogDTO {
-    private int id;
+    private Integer id;
     private String content;
     private java.util.Date month;
 
-    private int user_id;
+    private Integer user_id;
 }

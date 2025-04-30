@@ -29,7 +29,7 @@
             <result property="diaryId" column="diary_id" />
         </association>
 
-        <collection property="tags" ofType="String">
+        <collection property="tags" ofType="java.lang.String">
             <result column="tag_name" />
         </collection>
     </resultMap>
@@ -66,6 +66,41 @@
         <result property="month" column="month" />
         <result property="userId" column="user_id" />
     </resultMap>
+
+    <!-- 일기 조회 쿼리 -->
+    <select id="selectDiaryByDateRange" resultMap="DiaryResultMap">
+        SELECT
+               a.id
+             , a.title
+             , a.content
+             , a.created_at
+             , a.is_deleted
+             , a.is_confirmed
+             , a.style_layer
+             , a.user_id
+
+             , b.id AS emotion_id
+             , b.positive_score
+             , b.neutral_score
+             , b.negative_score
+             , b.total_score
+             , b.emotion_summary1
+             , b.emotion_summary2
+             , b.emotion_summary3
+             , b.my_diary_summary
+             , b.my_diary_id AS diary_id
+
+             , d.tag_name
+
+          FROM my_diary a
+          LEFT JOIN emotion_analyze b ON a.id = b.my_diary_id
+          LEFT JOIN my_diary_tag c ON a.id = c.my_diary_id
+          LEFT JOIN tag d ON c.tag_id = d.id
+         WHERE a.created_at &gt;= #{start}
+           AND a.created_at &lt; #{end}
+           AND a.user_id = #{userId}
+           AND a.is_deleted = 'N'
+    </select>
 
     <!-- 월간 조회 쿼리 -->
     <select id="selectDiaryForMonth" resultMap="MonthlyDiaryResultMap">

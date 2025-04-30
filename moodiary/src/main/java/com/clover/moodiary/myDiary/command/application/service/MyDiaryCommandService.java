@@ -8,4 +8,8 @@ public interface MyDiaryCommandService {
     void registDiary(MyDiaryCommandDTO myDiaryCommandDTO);
 
     void saveMoodlog(MoodlogDTO dto);
+
+    void updateDiary(MyDiaryCommandDTO myDiaryCommandDTO);
+
+    void deleteDiary(Integer diaryId);
 }

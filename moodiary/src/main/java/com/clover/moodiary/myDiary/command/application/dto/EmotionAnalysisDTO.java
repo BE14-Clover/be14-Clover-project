@@ -8,16 +8,16 @@ import lombok.*;
 @Setter
 @ToString
 public class EmotionAnalysisDTO {
-    private int id;
-    private int positiveScore;
-    private int neutralScore;
-    private int negativeScore;
-    private int totalScore;
+    private Integer id;
+    private Integer positiveScore;
+    private Integer neutralScore;
+    private Integer negativeScore;
+    private Integer totalScore;
     private String emotionalSummary1;
     private String emotionalSummary2;
     private String emotionalSummary3;
     private String diarySummary;
 
-    private int myDiaryId;
+    private Integer myDiaryId;
 
 }

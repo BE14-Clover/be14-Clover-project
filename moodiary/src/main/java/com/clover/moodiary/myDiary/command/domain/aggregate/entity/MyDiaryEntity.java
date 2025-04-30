@@ -1,3 +1,5 @@
+// 📄 src/main/java/com/clover/moodiary/myDiary/command/domain/aggregate/entity/MyDiaryEntity.java
+
 package com.clover.moodiary.myDiary.command.domain.aggregate.entity;
 
 import jakarta.persistence.*;
@@ -39,4 +41,7 @@ public class MyDiaryEntity {
 
     @Column(name = "user_id", nullable = false)
     private Integer userId;
+
+    @OneToOne(mappedBy = "myDiaryEntity", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private EmotionAnalysisEntity emotionAnalysis;
 }
