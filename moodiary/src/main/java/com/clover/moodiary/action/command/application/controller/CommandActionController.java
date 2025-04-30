@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.clover.moodiary.action.command.application.service.CommandActionService;
@@ -29,7 +30,9 @@ public class CommandActionController {
 	/* 설명. 회원가입 시 혹은 가중치 초기화 버튼 클릭 시 */
 	/* TODO. 일단 RequestParam으로 userID를 받아온다고 가정 */
 	@PostMapping("/weight/init")
-	public ResponseEntity<String> initUserPreference(@RequestParam(value = "userId") int userId) {
+	public ResponseEntity<String> initUserPreference() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		Integer userId = (Integer) auth.getPrincipal();
 		try {
 			commandActionService.insertInitialUserPreferences(userId);
 		} catch (Exception e) {
@@ -40,7 +43,9 @@ public class CommandActionController {
 	
 	/* 목차. 회원의 가중치 변경 */
 	@PostMapping("/{actionId}/change")
-	public ResponseEntity<String> plusUserPreferences(@PathVariable(value = "actionId") int actionId, @RequestParam(value = "userId") int userId, @RequestBody Map<String, Integer> changeValue) {
+	public ResponseEntity<String> plusUserPreferences(@PathVariable(value = "actionId") int actionId, @RequestBody Map<String, Integer> changeValue) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		Integer userId = (Integer) auth.getPrincipal();
 		commandActionService.changeUserPreferences(userId, actionId, changeValue.get("changeValue"));
 		String actionName = actionService.getRecommendedActionById(actionId).getAction();
 		return ResponseEntity.ok(actionName + " weight changed by" + changeValue.get("changeValue"));
@@ -49,7 +54,9 @@ public class CommandActionController {
 	/* 목차. 추천 행동 태그 필터링 */
 	/* 설명. 추천 행동 태그 목록 필터로 체크된 목록 받으면(적용) 해당 목록에 해당하는 가중치 0으로 설정 */
 	@PostMapping("/exclude")
-	public ResponseEntity<String> excludeUserPreferences(@RequestParam(value = "userId") int userId, @RequestBody List<Integer> excludingActionTagList) {
+	public ResponseEntity<String> excludeUserPreferences(@RequestBody List<Integer> excludingActionTagList) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		Integer userId = (Integer) auth.getPrincipal();
 		commandActionService.excludeActionTagList(userId, excludingActionTagList);
 		return ResponseEntity.ok("Following Action Tags Are Excluded: " + excludingActionTagList.toString());
 	}
