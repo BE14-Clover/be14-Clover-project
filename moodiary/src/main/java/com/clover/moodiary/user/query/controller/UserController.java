@@ -6,6 +6,8 @@ import com.clover.moodiary.user.query.dto.UserDTO;
 import com.clover.moodiary.user.query.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,6 +23,13 @@ public class UserController {
 
 	@GetMapping("/info/{userId}")
 	public ResponseEntity<UserDTO> findInfo(@PathVariable int userId) {
+		return ResponseEntity.ok(userService.findInfo(userId));
+	}
+
+	@GetMapping("/me")
+	public ResponseEntity<UserDTO> findMyInfo() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		Integer userId = (Integer) auth.getPrincipal();
 		return ResponseEntity.ok(userService.findInfo(userId));
 	}
 }
