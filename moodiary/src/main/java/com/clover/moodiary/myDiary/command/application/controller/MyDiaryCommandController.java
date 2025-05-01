@@ -31,6 +31,8 @@ public class MyDiaryCommandController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Integer userId = (Integer)auth.getPrincipal();
 
+        myDiaryCommandDTO.setUserId(userId);
+
         try {
             myDiaryCommandService.registDiary(myDiaryCommandDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body("일기 등록 완료");
