@@ -1,5 +1,6 @@
 package com.clover.moodiary.myDiary.command.application.service;
 
+import com.clover.moodiary.global.util.S3Uploader;
 import com.clover.moodiary.myDiary.command.application.dto.EmotionAnalysisDTO;
 import com.clover.moodiary.myDiary.command.application.dto.MyDiaryCommandDTO;
 import com.clover.moodiary.myDiary.command.application.dto.MoodlogDTO;
@@ -10,7 +11,9 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -25,24 +28,26 @@ public class MyDiaryCommandServiceImpl implements MyDiaryCommandService {
     private final MyDiaryTagRepository myDiaryTagRepository;
     private final MoodlogRepository moodlogRepository;
     private final EmotionAnalysisRepository emotionAnalysisRepository;
+    private final S3Uploader s3Uploader;
 
     @Autowired
     public MyDiaryCommandServiceImpl(MyDiaryRepository myDiaryRepository,
                                      TagRepository tagRepository,
                                      MyDiaryTagRepository myDiaryTagRepository,
                                      MoodlogRepository moodlogRepository,
-                                     EmotionAnalysisRepository emotionAnalysisRepository
+                                     EmotionAnalysisRepository emotionAnalysisRepository, S3Uploader s3Uploader
     ) {
         this.myDiaryRepository = myDiaryRepository;
         this.tagRepository = tagRepository;
         this.myDiaryTagRepository = myDiaryTagRepository;
         this.moodlogRepository = moodlogRepository;
         this.emotionAnalysisRepository = emotionAnalysisRepository;
+        this.s3Uploader = s3Uploader;
     }
 
     @Transactional
     @Override
-    public void registDiary(MyDiaryCommandDTO dto) {
+    public void registDiary(MyDiaryCommandDTO dto, MultipartFile image) {
         LocalDate targetDate = dto.getCreatedAt().toLocalDate();
         LocalDateTime startOfDay = targetDate.atStartOfDay();
         LocalDateTime endOfDay = targetDate.atTime(23, 59, 59, 999_999_999);
@@ -54,6 +59,16 @@ public class MyDiaryCommandServiceImpl implements MyDiaryCommandService {
             String message = "이미 오늘 일기를 등록하셨습니다.";
             log.warn(message);
             throw new IllegalStateException(message);
+        }
+
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = null;
+            try {
+                imageUrl = s3Uploader.upload(image);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            dto.setStyleLayer(imageUrl);
         }
 
         MyDiaryEntity diary = MyDiaryEntity.builder()
