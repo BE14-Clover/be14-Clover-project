@@ -19,6 +19,11 @@ public interface MyDiaryRepository extends JpaRepository<MyDiaryEntity, Integer>
     Optional<MyDiaryEntity> findByCreatedAtAndUserId(@Param("createdDate") LocalDate createdAt,
                                                        @Param("userId") Integer userId);
 
+    boolean existsByCreatedAtBetweenAndUserIdAndIsDeleted(LocalDateTime start,
+                                                          LocalDateTime end,
+                                                          Integer userId,
+                                                          String isDeleted);
+
     boolean existsByCreatedAtAndUserIdAndIsDeleted(LocalDateTime createdAt, Integer userId, String isDeleted);
 
     Optional<MyDiaryEntity> findByIdAndIsDeleted(Integer id, String isDeleted);

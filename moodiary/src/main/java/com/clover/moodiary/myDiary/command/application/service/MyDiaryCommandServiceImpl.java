@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
@@ -42,13 +43,15 @@ public class MyDiaryCommandServiceImpl implements MyDiaryCommandService {
     @Transactional
     @Override
     public void registDiary(MyDiaryCommandDTO dto) {
-        LocalDate createdDate = dto.getCreatedAt().toLocalDate();
+        LocalDate targetDate = dto.getCreatedAt().toLocalDate();
+        LocalDateTime startOfDay = targetDate.atStartOfDay();
+        LocalDateTime endOfDay = targetDate.atTime(23, 59, 59, 999_999_999);
 
-        boolean existsNotDeleted = myDiaryRepository.existsByCreatedAtAndUserIdAndIsDeleted(
-                dto.getCreatedAt(), dto.getUserId(), "N");
+        boolean existsNotDeleted = myDiaryRepository.existsByCreatedAtBetweenAndUserIdAndIsDeleted(
+                startOfDay, endOfDay, dto.getUserId(), "N");
 
         if (existsNotDeleted) {
-            String message = "이미 등록된 일기가 있습니다.";
+            String message = "이미 오늘 일기를 등록하셨습니다.";
             log.warn(message);
             throw new IllegalStateException(message);
         }
@@ -57,7 +60,7 @@ public class MyDiaryCommandServiceImpl implements MyDiaryCommandService {
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .createdAt(dto.getCreatedAt())
-                .isDeleted("N") // 기본값 'N'
+                .isDeleted("N")
                 .isConfirmed(dto.getIsConfirmed())
                 .styleLayer(dto.getStyleLayer())
                 .userId(dto.getUserId())
