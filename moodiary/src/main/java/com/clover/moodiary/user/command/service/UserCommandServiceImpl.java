@@ -10,6 +10,8 @@ import com.clover.moodiary.user.command.repository.UserRepository;
 import com.clover.moodiary.user.command.service.UserCommandService;
 import com.clover.moodiary.user.command.util.JwtUtil;
 import com.clover.moodiary.user.command.util.MailUtil;
+
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.annotation.Primary;
@@ -94,10 +96,34 @@ public class UserCommandServiceImpl implements UserCommandService {
 			.build();
 		tokenRepo.save(prt);
 
-		String resetLink = "http://localhost:8080/user/command/reset-password?token=" + newToken;
-		mailUtil.sendEmail(u.getEmail(),
+		String resetLink = "http://localhost:5173/reset-password?token=" + newToken;
+
+		String htmlBody = """
+				<div style="font-family: 'Arial', sans-serif; padding: 20px; background-color: #fff7ee;">
+					<h2 style="color: #A17C59;">[Moodiary] 비밀번호 재설정 안내</h2>
+					<p>안녕하세요,<br>아래 버튼을 클릭하여 비밀번호를 재설정해 주세요.</p>
+					<a href="%s" style="
+						display: inline-block;
+						padding: 12px 24px;
+						margin-top: 16px;
+						background-color: #A17C59;
+						color: white;
+						text-decoration: none;
+						font-weight: bold;
+						border-radius: 8px;">
+						🔐 비밀번호 재설정
+					</a>
+					<p style="margin-top: 20px; font-size: 12px; color: #888;">
+						※ 만약 버튼이 동작하지 않는다면 아래 링크를 복사해 브라우저에 붙여넣기 해 주세요:<br>
+						<a href="%s">%s</a>
+					</p>
+				</div>
+			""".formatted(resetLink, resetLink, resetLink);
+
+		mailUtil.sendEmail(
+			u.getEmail(),
 			"[Moodiary] 비밀번호 재설정 안내",
-			"아래 링크를 클릭하여 비밀번호를 재설정해 주세요:\n" + resetLink
+			htmlBody
 		);
 	}
 
@@ -122,9 +148,12 @@ public class UserCommandServiceImpl implements UserCommandService {
 	public void updateUser(UpdateUserRequest dto) {
 		User u = userRepo.findById(dto.getId())
 			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자"));
-		if (dto.getName() != null)        u.setName(dto.getName());
-		if (dto.getEmail() != null)       u.setEmail(dto.getEmail());
-		if (dto.getPhoneNumber() != null) u.setPhoneNumber(dto.getPhoneNumber());
+		if (dto.getName() != null)
+			u.setName(dto.getName());
+		if (dto.getEmail() != null)
+			u.setEmail(dto.getEmail());
+		if (dto.getPhoneNumber() != null)
+			u.setPhoneNumber(dto.getPhoneNumber());
 		if (dto.getNewPassword() != null) {
 			u.setPassword(passwordEncoder.encode(dto.getNewPassword()));
 		}
