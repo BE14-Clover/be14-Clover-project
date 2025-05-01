@@ -50,7 +50,7 @@ public class ActionQueryServiceTest {
 	}
 	
 	@ParameterizedTest
-	@ValueSource(ints = {1})
+	@ValueSource(ints = {11})
 	public void getParentActionTagByActionTagTest(int actionTagId) {
 		Assertions.assertNotNull(actionService.getParentActionTagByActionTag(actionTagId));
 	}
