@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,8 +35,10 @@ public class UserCommandController {
 		return ResponseEntity.ok().build();
 	}
 
-	@PostMapping("/delete/{userId}")
-	public ResponseEntity<Void> delete(@PathVariable int userId) {
+	@PostMapping("/delete")
+	public ResponseEntity<Void> delete() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		Integer userId = (Integer) auth.getPrincipal();
 		svc.deleteAccount(userId);
 		return ResponseEntity.ok().build();
 	}
