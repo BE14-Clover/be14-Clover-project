@@ -39,8 +39,6 @@ public class CommandActionServiceImpl implements CommandActionService {
 	
 	@Override
 	public void changeUserPreferences(int userId, int actionId, int changeValue) {
-
-		
 		List<TaggedRecommendedActionsDTO> taggedRecommendedActionsDTOList = actionService.getActionTagByActionId(actionId);
 		List<UserPreferencesDTO> userPreferencesDTOList = new ArrayList<>();
 		UserPreferencesDTO upDTO;
