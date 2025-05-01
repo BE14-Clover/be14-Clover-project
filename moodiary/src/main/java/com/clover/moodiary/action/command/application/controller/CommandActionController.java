@@ -28,7 +28,6 @@ public class CommandActionController {
 	
 	/* 목차. 회원 가중치 전체 초기화 */
 	/* 설명. 회원가입 시 혹은 가중치 초기화 버튼 클릭 시 */
-	/* TODO. 일단 RequestParam으로 userID를 받아온다고 가정 */
 	@PostMapping("/weight/init")
 	public ResponseEntity<String> initUserPreference() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
