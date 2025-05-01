@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.clover.moodiary.myDiary.query.mapper.MyDiaryMapper">
+
+    <!-- 일기 조회 -->
+    <resultMap id="DiaryResultMap" type="com.clover.moodiary.myDiary.query.dto.MyDiaryDTO">
+        <id property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="content" column="content" />
+        <result property="createdAt" column="created_at" />
+        <result property="isConfirmed" column="is_confirmed" />
+        <result property="styleLayer" column="style_layer" />
+        <result property="userId" column="user_id" />
+
+        <association property="myDiaryEmotion" javaType="com.clover.moodiary.myDiary.query.dto.MyDiaryEmotionDTO">
+            <id property="id" column="emotion_id" />
+            <result property="positiveScore" column="positive_score" />
+            <result property="neutralScore" column="neutral_score" />
+            <result property="negativeScore" column="negative_score" />
+            <result property="totalScore" column="total_score" />
+            <result property="emotionSummary1" column="emotion_summary1" />
+            <result property="emotionSummary2" column="emotion_summary2" />
+            <result property="emotionSummary3" column="emotion_summary3" />
+            <result property="diarySummary" column="diary_summary" />
+            <result property="diaryId" column="diary_id" />
+        </association>
+
+        <collection property="tags" ofType="java.lang.String">
+            <result column="tag_name" />
+        </collection>
+    </resultMap>
+
+    <!-- 월간 캘린더 조회 -->
+    <resultMap id="MonthlyDiaryResultMap" type="com.clover.moodiary.myDiary.query.dto.MonthlyDiaryDTO">
+        <id property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="createdAt" column="created_at" />
+        <result property="isConfirmed" column="is_confirmed" />
+        <result property="styleLayer" column="style_layer" />
+        <result property="positiveScore" column="positive_score" />
+        <result property="neutralScore" column="neutral_score" />
+        <result property="negativeScore" column="negative_score" />
+        <result property="totalScore" column="total_score" />
+        <result property="emotionSummary1" column="emotion_summary1" />
+        <result property="emotionSummary2" column="emotion_summary2" />
+        <result property="emotionSummary3" column="emotion_summary3" />
+    </resultMap>
+
+    <!-- 주간 캘린더 조회 -->
+    <resultMap id="WeeklyDiaryResultMap" type="com.clover.moodiary.myDiary.query.dto.WeeklyDiaryDTO">
+        <id property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="content" column="content" />
+        <result property="createdAt" column="created_at" />
+        <result property="isConfirmed" column="is_confirmed" />
+        <result property="styleLayer" column="style_layer" />
+        <result property="totalScore" column="total_score" />
+    </resultMap>
+
+    <!--  Moodlog 조회  -->
+    <resultMap id="MoodlogResultMap" type="com.clover.moodiary.myDiary.query.dto.MoodlogDTO">
+        <id property="id" column="id" />
+        <result property="content" column="content" />
+        <result property="month" column="month" />
+        <result property="userId" column="user_id" />
+    </resultMap>
+
+    <!-- 일기 조회 쿼리 -->
+    <select id="selectDiaryByDateRange" resultMap="DiaryResultMap">
+        SELECT
+               a.id
+             , a.title
+             , a.content
+             , a.created_at
+             , a.is_confirmed
+             , a.style_layer
+             , a.user_id
+
+             , b.id AS emotion_id
+             , b.positive_score
+             , b.neutral_score
+             , b.negative_score
+             , b.total_score
+             , b.emotion_summary1
+             , b.emotion_summary2
+             , b.emotion_summary3
+             , b.my_diary_summary
+             , b.my_diary_id AS diary_id
+
+             , d.tag_name
+
+          FROM my_diary a
+          LEFT JOIN emotion_analyze b ON a.id = b.my_diary_id
+          LEFT JOIN my_diary_tag c ON a.id = c.my_diary_id
+          LEFT JOIN tag d ON c.tag_id = d.id
+         WHERE a.created_at &gt;= #{start}
+           AND a.created_at &lt; #{end}
+           AND a.user_id = #{userId}
+           AND a.is_deleted = 'N'
+    </select>
+
+    <!-- 월간 조회 쿼리 -->
+    <select id="selectDiaryForMonth" resultMap="MonthlyDiaryResultMap">
+        SELECT
+               a.id
+             , a.title
+             , a.created_at
+             , a.is_confirmed
+             , a.style_layer
+             , b.positive_score
+             , b.neutral_score
+             , b.negative_score
+             , b.total_score
+             , b.emotion_summary1
+             , b.emotion_summary2
+             , b.emotion_summary3
+          FROM my_diary a
+          LEFT JOIN emotion_analyze b ON a.id = b.my_diary_id
+         WHERE a.user_id = #{userId}
+           AND a.is_deleted = 'N'
+           AND DATE_FORMAT(a.created_at, '%Y-%m') = #{targetMonth}
+         ORDER BY a.created_at;
+    </select>
+
+    <!-- 주간 조회 쿼리 -->
+    <select id="selectDiaryForWeek" resultMap="WeeklyDiaryResultMap">
+        SELECT
+               a.id
+             , a.title
+             , a.content
+             , a.created_at
+             , a.is_confirmed
+             , a.style_layer
+             , b.total_score
+          FROM my_diary a
+          LEFT JOIN emotion_analyze b ON a.id = b.my_diary_id
+         WHERE a.user_id = #{userId}
+           AND a.is_deleted = 'N'
+           AND a.created_at >= #{startDate}
+           AND a.created_at &lt; #{endDate}
+         ORDER BY a.created_at;
+    </select>
+
+    <!--  Moodlog 조회  -->
+    <select id="selectMoodlog" resultMap="MoodlogResultMap">
+        SELECT
+               id
+             , content
+             , month
+          FROM moodlog
+        WHERE user_id = #{userId}
+          AND month = #{targetMonth}
+    </select>
+
+
+</mapper>
