@@ -18,4 +18,5 @@ public class SharedDiaryDetailResponse {
     private String fixedState;
     private Integer userId;
     private String styleLayer;
+    private Integer sharedDiaryRoomId;
 }

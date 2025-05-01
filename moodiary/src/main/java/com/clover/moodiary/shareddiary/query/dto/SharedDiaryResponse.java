@@ -18,4 +18,5 @@ public class SharedDiaryResponse {
     private String isDeleted;
     private String fixedState;
     private Integer userId;
+    private String userName;
 }

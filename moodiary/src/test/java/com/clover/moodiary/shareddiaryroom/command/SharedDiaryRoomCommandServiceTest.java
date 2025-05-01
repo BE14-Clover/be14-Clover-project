@@ -1,7 +1,5 @@
 package com.clover.moodiary.shareddiaryroom.command;
 
-import com.clover.moodiary.shareddiaryroom.command.dto.CreateSharedDiaryRoomRequest;
-import com.clover.moodiary.shareddiaryroom.command.dto.EnterSharedDiaryRoomRequest;
 import com.clover.moodiary.shareddiaryroom.command.entity.SharedDiaryRoom;
 import com.clover.moodiary.shareddiaryroom.command.repository.SharedDiaryRoomRepository;
 import com.clover.moodiary.shareddiaryroom.command.service.SharedDiaryRoomCommandService;
@@ -24,11 +22,9 @@ public class SharedDiaryRoomCommandServiceTest {
     @ParameterizedTest
     @DisplayName("공유 일기방 생성 테스트")
     @ValueSource(ints = {1})
-    public void createSharedDiaryRoomTest(int userId1){
-
-        CreateSharedDiaryRoomRequest request = new CreateSharedDiaryRoomRequest(userId1);
-
-        Integer roomId = sharedDiaryRoomCommandService.createRoom(request).getRoomId();
+    public void createSharedDiaryRoomTest(int userId1) {
+        // 변경된 createRoom(userId) 방식에 맞춤
+        Integer roomId = sharedDiaryRoomCommandService.createRoom(userId1).getRoomId();
 
         SharedDiaryRoom room = sharedDiaryRoomRepository.findById(roomId).orElse(null);
         Assertions.assertNotNull(room);
@@ -40,16 +36,15 @@ public class SharedDiaryRoomCommandServiceTest {
     @DisplayName("공유 일기방 입장 테스트")
     @ValueSource(ints = {2})
     public void enterSharedDiaryRoomTest(int userId2) {
+        // 1번 유저가 먼저 생성
+        Integer roomId = sharedDiaryRoomCommandService.createRoom(1).getRoomId();
 
-        CreateSharedDiaryRoomRequest createRequest = new CreateSharedDiaryRoomRequest(1);
-        Integer roomId = sharedDiaryRoomCommandService.createRoom(createRequest).getRoomId();
-
-        EnterSharedDiaryRoomRequest enterRequest = new EnterSharedDiaryRoomRequest(roomId, userId2);
-        sharedDiaryRoomCommandService.enterRoom(enterRequest);
+        // 2번 유저가 입장 (DTO 없이 userId 직접 전달)
+        sharedDiaryRoomCommandService.enterRoom(roomId, userId2);
 
         SharedDiaryRoom room = sharedDiaryRoomRepository.findById(roomId).orElse(null);
         Assertions.assertNotNull(room);
-        Assertions.assertEquals(1,room.getUserId1());
-        Assertions.assertEquals(userId2,room.getUserId2());
+        Assertions.assertEquals(1, room.getUserId1());
+        Assertions.assertEquals(userId2, room.getUserId2());
     }
 }

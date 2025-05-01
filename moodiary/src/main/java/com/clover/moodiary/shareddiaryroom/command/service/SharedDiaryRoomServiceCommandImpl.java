@@ -1,8 +1,6 @@
 package com.clover.moodiary.shareddiaryroom.command.service;
 
-import com.clover.moodiary.shareddiaryroom.command.dto.CreateSharedDiaryRoomRequest;
 import com.clover.moodiary.shareddiaryroom.command.dto.CreateSharedDiaryRoomResponse;
-import com.clover.moodiary.shareddiaryroom.command.dto.EnterSharedDiaryRoomRequest;
 import com.clover.moodiary.shareddiaryroom.command.entity.SharedDiaryRoom;
 import com.clover.moodiary.shareddiaryroom.command.repository.SharedDiaryRoomRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,19 +15,19 @@ public class SharedDiaryRoomServiceCommandImpl implements SharedDiaryRoomCommand
 
     @Override
     @Transactional
-    public CreateSharedDiaryRoomResponse createRoom(CreateSharedDiaryRoomRequest request) {
-        SharedDiaryRoom room = new SharedDiaryRoom(request.getUserId1());
+    public CreateSharedDiaryRoomResponse createRoom(Integer userId) {
+        SharedDiaryRoom room = new SharedDiaryRoom(userId);
         SharedDiaryRoom savedRoom = sharedDiaryRoomRepository.save(room);
         return new CreateSharedDiaryRoomResponse(savedRoom.getId());
     }
 
     @Override
     @Transactional
-    public void enterRoom(EnterSharedDiaryRoomRequest request) {
-        SharedDiaryRoom room = sharedDiaryRoomRepository.findById(request.getRoomId())
+    public void enterRoom(Integer roomId, Integer userId) {
+        SharedDiaryRoom room = sharedDiaryRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 방입니다."));
 
-        if(room.getUserId1().equals(request.getUserId())){
+        if(room.getUserId1().equals(userId)){
             throw new IllegalArgumentException("이미 방에 입장해 있습니다.");
         }
 
@@ -37,7 +35,7 @@ public class SharedDiaryRoomServiceCommandImpl implements SharedDiaryRoomCommand
             throw new IllegalArgumentException("이미 입장한 공유 일기방입니다.");
         }
 
-        room.setUserId2(request.getUserId());
+        room.setUserId2(userId);
         sharedDiaryRoomRepository.save(room);
     }
 }
