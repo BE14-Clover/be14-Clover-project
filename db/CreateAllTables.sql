@@ -129,7 +129,7 @@ CREATE TABLE shared_diary
     created_at           DATETIME     NOT NULL COMMENT '작성 시간',
     is_deleted           VARCHAR(4)   NOT NULL DEFAULT 'N' COMMENT '삭제 여부',
     fixed_state          VARCHAR(4)   NOT NULL DEFAULT 'N' COMMENT '작성 상태',
-    style_layer          TEXT         NULL COMMENT '스티커 레이어',
+    style_layer          LONGTEXT     NULL COMMENT '스티커 레이어',
     shared_diary_room_id INT          NOT NULL COMMENT '공유 일기 방 id',
     user_id              INT          NOT NULL COMMENT '작성자 id',
     CONSTRAINT pk_shared_diary_id PRIMARY KEY (id),

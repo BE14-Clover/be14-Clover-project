@@ -26,6 +26,7 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
+			.cors(Customizer.withDefaults())
 			// CSRF 비활성화 (stateless API 용)
 			.csrf(csrf -> csrf.disable())
 			// 세션을 생성하지 않도록 설정
