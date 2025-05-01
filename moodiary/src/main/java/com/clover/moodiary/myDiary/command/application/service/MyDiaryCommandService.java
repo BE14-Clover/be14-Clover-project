@@ -16,3 +16,4 @@ public interface MyDiaryCommandService {
 
     void saveEmotionAnalysis(EmotionAnalysisDTO dto);
 }
+

@@ -43,18 +43,21 @@ public class MyDiaryCommandServiceImpl implements MyDiaryCommandService {
     @Override
     public void registDiary(MyDiaryCommandDTO dto) {
         LocalDate createdDate = dto.getCreatedAt().toLocalDate();
-        boolean exists = myDiaryRepository.findByCreatedDateAndUserId(createdDate, dto.getUserId()).isPresent();
 
-        if (exists) {
-            log.warn("이미 해당 날짜에 작성된 일기가 있습니다. - 날짜: {}, 유저ID: {}", createdDate, dto.getUserId());
-            throw new IllegalStateException("이미 오늘 날짜에 작성된 일기가 존재합니다.");
+        boolean existsNotDeleted = myDiaryRepository.existsByCreatedAtAndUserIdAndIsDeleted(
+                dto.getCreatedAt(), dto.getUserId(), "N");
+
+        if (existsNotDeleted) {
+            String message = "이미 등록된 일기가 있습니다.";
+            log.warn(message);
+            throw new IllegalStateException(message);
         }
 
         MyDiaryEntity diary = MyDiaryEntity.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .createdAt(dto.getCreatedAt())
-                .isDeleted(dto.getIsDeleted())
+                .isDeleted("N") // 기본값 'N'
                 .isConfirmed(dto.getIsConfirmed())
                 .styleLayer(dto.getStyleLayer())
                 .userId(dto.getUserId())
@@ -79,7 +82,8 @@ public class MyDiaryCommandServiceImpl implements MyDiaryCommandService {
         MoodlogEntity moodlog = moodlogRepository.findByUserIdAndMonth(dto.getUserId(), month)
                 .map(existing -> {
                     existing.setContent(dto.getContent());
-                    log.info("기존 moodlog 수정 - ID: {}, userId: {}, month: {}", existing.getId(), dto.getUserId(), month);
+                    log.info("기존 moodlog 수정 - ID: {}, userId: {}, month: {}",
+                            existing.getId(), dto.getUserId(), month);
                     return existing;
                 })
                 .orElseGet(() -> {
@@ -98,15 +102,15 @@ public class MyDiaryCommandServiceImpl implements MyDiaryCommandService {
     @Transactional
     @Override
     public void updateDiary(MyDiaryCommandDTO dto) {
-        MyDiaryEntity diary = myDiaryRepository.findById(dto.getId())
-                .orElseThrow(() -> new EntityNotFoundException("ID: " + dto.getId() + "에 해당하는 일기가 없습니다."));
+        // ✅ isDeleted='N'인 일기만 찾아서 수정
+        MyDiaryEntity diary = myDiaryRepository.findByIdAndIsDeleted(dto.getId(), "N")
+                .orElseThrow(() -> new EntityNotFoundException("수정 가능한 일기를 찾을 수 없습니다. ID: " + dto.getId()));
 
-        log.info("일기 수정 시작 - 기존 데이터: {}", diary);
+        log.info("일기 수정 시작 - ID: {}", diary.getId());
 
         diary.setTitle(dto.getTitle());
         diary.setContent(dto.getContent());
         diary.setStyleLayer(dto.getStyleLayer());
-        diary.setIsDeleted(dto.getIsDeleted());
         diary.setIsConfirmed(dto.getIsConfirmed());
         diary.setCreatedAt(dto.getCreatedAt());
 
@@ -145,20 +149,21 @@ public class MyDiaryCommandServiceImpl implements MyDiaryCommandService {
     @Transactional
     @Override
     public void deleteDiary(Integer diaryId) {
-        MyDiaryEntity diary = myDiaryRepository.findById(diaryId)
-                .orElseThrow(() -> new EntityNotFoundException("일기 ID " + diaryId + " 없음"));
+        MyDiaryEntity diary = myDiaryRepository.findByIdAndIsDeleted(diaryId, "N")
+                .orElseThrow(() -> new EntityNotFoundException("삭제 가능한 일기를 찾을 수 없습니다. ID: " + diaryId));
 
-        try {
-            myDiaryTagRepository.deleteByDiaryId(diaryId);
-            log.info("태그 매핑 삭제 완료 - diaryId: {}", diaryId);
+        myDiaryTagRepository.deleteByDiaryId(diaryId);
+        log.info("태그 매핑 삭제 완료 - diaryId: {}", diaryId);
 
-            myDiaryRepository.delete(diary);
-            log.info("일기 및 감정 분석 삭제 완료 - diaryId: {}", diaryId);
-
-        } catch (Exception e) {
-            log.error("일기 삭제 중 예외 발생 - rollback 수행", e);
-            throw e; // 롤백
+        // ✅ emotionAnalysisRepository.delete() 호출 제거!
+        if (diary.getEmotionAnalysis() != null) {
+            diary.setEmotionAnalysis(null); // orphanRemoval=true 에 의해 자동 삭제
+            log.info("감정 분석 연결 해제 - diaryId: {}", diaryId);
         }
+
+        diary.setIsDeleted("Y");
+        myDiaryRepository.save(diary); // flush 시 cascade + orphanRemoval에 의해 emotionAnalysis 삭제됨
+        log.info("일기 soft delete 완료 - diaryId: {}", diaryId);
     }
 
     // 감정 분석 저장

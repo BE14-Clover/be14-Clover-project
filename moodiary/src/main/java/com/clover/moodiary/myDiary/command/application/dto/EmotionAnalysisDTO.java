@@ -21,3 +21,4 @@ public class EmotionAnalysisDTO {
     private Integer myDiaryId;
 
 }
+

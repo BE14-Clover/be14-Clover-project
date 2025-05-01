@@ -15,5 +15,6 @@ public class WeeklyDiaryDTO {
     private String content;
     private LocalDateTime createdAt;
     private String isConfirmed;
+    private String styleLayer;
     private Integer totalScore;
 }

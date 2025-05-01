@@ -11,7 +11,6 @@
         <result property="title" column="title" />
         <result property="content" column="content" />
         <result property="createdAt" column="created_at" />
-        <result property="isDeleted" column="is_deleted" />
         <result property="isConfirmed" column="is_confirmed" />
         <result property="styleLayer" column="style_layer" />
         <result property="userId" column="user_id" />
@@ -40,6 +39,7 @@
         <result property="title" column="title" />
         <result property="createdAt" column="created_at" />
         <result property="isConfirmed" column="is_confirmed" />
+        <result property="styleLayer" column="style_layer" />
         <result property="positiveScore" column="positive_score" />
         <result property="neutralScore" column="neutral_score" />
         <result property="negativeScore" column="negative_score" />
@@ -56,6 +56,7 @@
         <result property="content" column="content" />
         <result property="createdAt" column="created_at" />
         <result property="isConfirmed" column="is_confirmed" />
+        <result property="styleLayer" column="style_layer" />
         <result property="totalScore" column="total_score" />
     </resultMap>
 
@@ -74,7 +75,6 @@
              , a.title
              , a.content
              , a.created_at
-             , a.is_deleted
              , a.is_confirmed
              , a.style_layer
              , a.user_id
@@ -109,6 +109,7 @@
              , a.title
              , a.created_at
              , a.is_confirmed
+             , a.style_layer
              , b.positive_score
              , b.neutral_score
              , b.negative_score
@@ -132,6 +133,7 @@
              , a.content
              , a.created_at
              , a.is_confirmed
+             , a,style_layer
              , b.total_score
           FROM my_diary a
           LEFT JOIN emotion_analyze b ON a.id = b.my_diary_id

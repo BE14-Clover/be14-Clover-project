@@ -1,6 +1,5 @@
 package com.clover.moodiary.myDiary.command.application.controller;
 
-
 import com.clover.moodiary.myDiary.command.application.dto.EmotionAnalysisDTO;
 import com.clover.moodiary.myDiary.command.application.dto.MoodlogDTO;
 import com.clover.moodiary.myDiary.command.application.dto.MyDiaryCommandDTO;
@@ -10,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -36,6 +34,34 @@ public class MyDiaryCommandController {
         }
     }
 
+    @PutMapping("/update")
+    public ResponseEntity<?> update(@RequestBody MyDiaryCommandDTO myDiaryCommandDTO) {
+        try {
+            myDiaryCommandService.updateDiary(myDiaryCommandDTO);
+            return ResponseEntity.ok("일기 수정 완료");
+        } catch (EntityNotFoundException e) {
+            log.warn("수정 실패 - 수정 가능한 일기 없음: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("수정 가능한 일기를 찾을 수 없습니다.");
+        } catch (Exception e) {
+            log.error("일기 수정 중 서버 오류", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류 발생");
+        }
+    }
+
+    @DeleteMapping("/{diaryId}")
+    public ResponseEntity<?> deleteDiary(@PathVariable Integer diaryId) {
+        try {
+            myDiaryCommandService.deleteDiary(diaryId);
+            return ResponseEntity.ok("일기 삭제(소프트 딜리트) 완료");
+        } catch (EntityNotFoundException e) {
+            log.warn("삭제 실패 - 삭제 가능한 일기 없음: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("삭제 가능한 일기를 찾을 수 없습니다.");
+        } catch (Exception e) {
+            log.error("일기 삭제 중 서버 오류", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류 발생");
+        }
+    }
+
     @PostMapping("/registEmotion")
     public ResponseEntity<?> registEmotion(@RequestBody EmotionAnalysisDTO emotionAnalysisDTO) {
         try {
@@ -45,7 +71,7 @@ public class MyDiaryCommandController {
             log.warn("요청 데이터 오류: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (EntityNotFoundException e) {
-            log.warn("해당 ID의 일기를 찾을 수 없습니다. ID: {}", emotionAnalysisDTO.getMyDiaryId());
+            log.warn("감정 분석 저장 실패 - 대상 일기 없음: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             log.error("감정 분석 저장 중 서버 오류", e);
@@ -53,46 +79,10 @@ public class MyDiaryCommandController {
         }
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<?> update(@RequestBody MyDiaryCommandDTO myDiaryCommandDTO) {
-        try {
-//            // 현재 인증된 사용자 정보 가져오기
-//            String username = SecurityContextHolder.getContext().getAuthentication().getName();
-//            log.info("일기 수정 요청 - 유저: {}, DTO: {}", username, myDiaryCommandDTO);
-
-            // 서비스 호출
-            myDiaryCommandService.updateDiary(myDiaryCommandDTO);
-
-            return ResponseEntity.ok("일기 수정 완료");
-        } catch (EntityNotFoundException e) {
-            log.warn("수정 실패 - 일기 없음. 세부 사항: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 일기를 찾을 수 없습니다.");
-        } catch (Exception e) {
-            log.error("일기 수정 중 서버 측 오류 발생", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류");
-        }
-    }
-
     @PostMapping("/moodlog")
     public ResponseEntity<?> registMoodlog(@RequestBody MoodlogDTO moodlogDTO) {
         myDiaryCommandService.saveMoodlog(moodlogDTO);
-        return ResponseEntity.ok("Moodlog 등록이 완료되었습니다.");
+        return ResponseEntity.ok("Moodlog 등록 완료");
     }
-
-    @DeleteMapping("/{diaryId}")
-    public ResponseEntity<?> deleteDiary(@PathVariable Integer diaryId) {
-        try {
-            myDiaryCommandService.deleteDiary(diaryId);
-            return ResponseEntity.ok("일기 삭제 완료");
-        } catch (EntityNotFoundException e) {
-            log.warn("삭제 실패 - 존재하지 않는 일기: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 일기를 찾을 수 없습니다.");
-        } catch (Exception e) {
-            log.error("일기 삭제 중 서버 오류 발생", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류");
-        }
-    }
-
-
-
 }
+

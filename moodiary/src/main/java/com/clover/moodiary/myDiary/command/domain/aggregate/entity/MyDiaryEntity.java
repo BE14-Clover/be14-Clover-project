@@ -42,6 +42,6 @@ public class MyDiaryEntity {
     @Column(name = "user_id", nullable = false)
     private Integer userId;
 
-    @OneToOne(mappedBy = "myDiaryEntity", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "myDiaryEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private EmotionAnalysisEntity emotionAnalysis;
 }

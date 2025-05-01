@@ -14,6 +14,7 @@ public class MonthlyDiaryDTO {
     private String title;
     private LocalDateTime createdAt;
     private String isConfirmed;
+    private String styleLayer;
     private Integer positiveScore;
     private Integer neutralScore;
     private Integer negativeScore;
