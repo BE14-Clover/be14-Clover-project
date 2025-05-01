@@ -141,7 +141,7 @@ fabric.properties
 hs_err_pid*
 replay_pid*
 
-#yml 파일 정보 관련 ignore 설정
+# yml 파일 정보 관련 ignore 설정
 application.yml
 applicaiton.properties
 
@@ -150,3 +150,6 @@ applicaiton.properties
 # intellij
 *.idea
 
+# Kubernetes 설정 yml 파일 폴더 관련 ignore 설정
+manifest-k8s
+boot*.yml
