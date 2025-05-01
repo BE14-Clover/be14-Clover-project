@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,6 +27,10 @@ public class MyDiaryCommandController {
 
     @PostMapping("/regist")
     public ResponseEntity<?> regist(@RequestBody MyDiaryCommandDTO myDiaryCommandDTO) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Integer userId = (Integer)auth.getPrincipal();
+
         try {
             myDiaryCommandService.registDiary(myDiaryCommandDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body("일기 등록 완료");
@@ -49,7 +55,7 @@ public class MyDiaryCommandController {
     }
 
     @DeleteMapping("/{diaryId}")
-    public ResponseEntity<?> deleteDiary(@PathVariable(value = "diaryId") Integer diaryId) {
+    public ResponseEntity<?> deleteDiary(@PathVariable Integer diaryId) {
         try {
             myDiaryCommandService.deleteDiary(diaryId);
             return ResponseEntity.ok("일기 삭제(소프트 딜리트) 완료");
@@ -85,4 +91,3 @@ public class MyDiaryCommandController {
         return ResponseEntity.ok("Moodlog 등록 완료");
     }
 }
-
