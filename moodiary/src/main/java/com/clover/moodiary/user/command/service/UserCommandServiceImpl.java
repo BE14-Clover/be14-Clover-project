@@ -66,11 +66,15 @@ public class UserCommandServiceImpl implements UserCommandService {
 	public LoginResponse login(LoginRequest dto) {
 		User u = userRepo.findByEmailAndDeletedFalse(dto.getEmail())
 			.orElseThrow(() -> new IllegalArgumentException("등록되지 않은 이메일"));
+
 		if (!passwordEncoder.matches(dto.getPassword(), u.getPassword())) {
 			throw new IllegalArgumentException("비밀번호 불일치");
 		}
+
 		String token = jwtUtil.generateToken(u.getId(), u.getEmail());
-		return new LoginResponse(token);
+		UserDTO userDTO = new UserDTO(u.getId(), u.getEmail(), u.getName());
+
+		return new LoginResponse(token, userDTO);
 	}
 
 	@Override
