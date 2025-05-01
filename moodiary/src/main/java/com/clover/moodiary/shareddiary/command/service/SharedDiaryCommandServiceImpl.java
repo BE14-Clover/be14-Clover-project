@@ -64,7 +64,7 @@ public class SharedDiaryCommandServiceImpl implements SharedDiaryCommandService 
 
     @Override
     @Transactional
-    public UpdateSharedDiaryReponse updateDiary(UpdateSharedDiaryRequest request) {
+    public UpdateSharedDiaryReponse updateDiary(UpdateSharedDiaryRequest request, MultipartFile image) {
         SharedDiary diary = sharedDiaryRepository.findById(request.getDiaryId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 일기입니다."));
 
@@ -72,9 +72,33 @@ public class SharedDiaryCommandServiceImpl implements SharedDiaryCommandService 
             throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
         }
 
+        String finalStyleLayer = request.getStyleLayer();
+
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = null;
+            try {
+                imageUrl = s3Uploader.upload(image);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            String imageLayerJson = String.format(
+                    "{\"type\":\"image\",\"src\":\"%s\",\"x\":0,\"y\":0,\"width\":200,\"height\":200,\"rotation\":0}",
+                    imageUrl
+            );
+
+            // styleLayer가 null 또는 빈 배열이면 새로 생성
+            if (finalStyleLayer == null || finalStyleLayer.trim().isEmpty() || finalStyleLayer.trim().equals("[]")) {
+                finalStyleLayer = "[" + imageLayerJson + "]";
+            } else {
+                // 기존 배열 끝에 , 추가해서 붙임
+                finalStyleLayer = finalStyleLayer.replaceAll("\\]$", "") + "," + imageLayerJson + "]";
+            }
+        }
+
         diary.setTitle(request.getTitle());
         diary.setContent(request.getContent());
-        diary.setStyleLayer(request.getStyleLayer());
+        diary.setStyleLayer(finalStyleLayer);
 
         return new UpdateSharedDiaryReponse(diary.getId());
     }

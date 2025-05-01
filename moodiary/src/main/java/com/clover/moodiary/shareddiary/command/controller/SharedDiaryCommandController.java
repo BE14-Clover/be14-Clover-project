@@ -31,7 +31,10 @@ public class SharedDiaryCommandController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<UpdateSharedDiaryReponse> updateDiary(@RequestBody UpdateSharedDiaryRequest request) {
+    public ResponseEntity<UpdateSharedDiaryReponse> updateDiary(
+            @RequestPart("data") UpdateSharedDiaryRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) throws IOException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Integer userId = (Integer) auth.getPrincipal();
 
@@ -42,7 +45,7 @@ public class SharedDiaryCommandController {
                 request.getContent(),
                 request.getStyleLayer()
         );
-        return ResponseEntity.ok(sharedDiaryCommandService.updateDiary(request));
+        return ResponseEntity.ok(sharedDiaryCommandService.updateDiary(request,image));
     }
 
     @PutMapping("/delete")

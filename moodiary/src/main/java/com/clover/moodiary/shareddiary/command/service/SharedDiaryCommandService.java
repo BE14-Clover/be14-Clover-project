@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface SharedDiaryCommandService {
     CreateSharedDiaryResponse createDiary(CreateSharedDiaryRequest request, MultipartFile image);
 
-    UpdateSharedDiaryReponse updateDiary(UpdateSharedDiaryRequest request);
+    UpdateSharedDiaryReponse updateDiary(UpdateSharedDiaryRequest request, MultipartFile image);
 
     DeleteSharedDiaryResponse deleteDiary(DeleteSharedDiaryRequest request);
 }
