@@ -1,5 +1,6 @@
 package com.clover.moodiary.myDiary.command.application.controller;
 
+import com.clover.moodiary.global.util.S3Uploader;
 import com.clover.moodiary.myDiary.command.application.dto.EmotionAnalysisDTO;
 import com.clover.moodiary.myDiary.command.application.dto.MoodlogDTO;
 import com.clover.moodiary.myDiary.command.application.dto.MyDiaryCommandDTO;
@@ -12,6 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @Slf4j
@@ -19,14 +23,19 @@ import org.springframework.web.bind.annotation.*;
 public class MyDiaryCommandController {
 
     private final MyDiaryCommandService myDiaryCommandService;
+    private final S3Uploader s3Uploader;
 
     @Autowired
-    public MyDiaryCommandController(MyDiaryCommandService myDiaryCommandService) {
+    public MyDiaryCommandController(MyDiaryCommandService myDiaryCommandService, S3Uploader s3Uploader) {
         this.myDiaryCommandService = myDiaryCommandService;
+        this.s3Uploader = s3Uploader;
     }
 
     @PostMapping("/regist")
-    public ResponseEntity<?> regist(@RequestBody MyDiaryCommandDTO myDiaryCommandDTO) {
+    public ResponseEntity<?> regist(
+            @RequestPart("dto") MyDiaryCommandDTO myDiaryCommandDTO,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Integer userId = (Integer)auth.getPrincipal();
@@ -34,7 +43,7 @@ public class MyDiaryCommandController {
         myDiaryCommandDTO.setUserId(userId);
 
         try {
-            myDiaryCommandService.registDiary(myDiaryCommandDTO);
+            myDiaryCommandService.registDiary(myDiaryCommandDTO, image);
             return ResponseEntity.status(HttpStatus.CREATED).body("일기 등록 완료");
         } catch (IllegalStateException e) {
             log.warn("일기 등록 실패: {}", e.getMessage());
