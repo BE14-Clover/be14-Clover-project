@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.clover.moodiary.shareddiaryroom.query.mapper.SharedDiaryRoomMapper">
+
+    <select id="findRoomByUserId" resultType="com.clover.moodiary.shareddiaryroom.query.dto.SharedDiaryRoomResponse">
+        SELECT
+               r.id AS roomId,
+               d.title AS latestTitle,
+               u.name AS authorName,
+               d.created_at AS createdAt
+          FROM shared_diary_room r
+          LEFT JOIN (
+               SELECT sd1.*
+               FROM shared_diary sd1
+               INNER JOIN (
+                     SELECT shared_diary_room_id, MAX(created_at) AS max_created
+                     FROM shared_diary
+                     WHERE is_deleted = 'N'
+                     GROUP BY shared_diary_room_id
+          ) sd2 ON sd1.shared_diary_room_id = sd2.shared_diary_room_id AND sd1.created_at = sd2.max_created
+        ) d ON r.id = d.shared_diary_room_id
+               LEFT JOIN user u ON d.user_id = u.id
+         WHERE r.user_id1 = #{userId}
+            OR r.user_id2 = #{userId}
+         ORDER BY r.id DESC
+    </select>
+
+</mapper>
