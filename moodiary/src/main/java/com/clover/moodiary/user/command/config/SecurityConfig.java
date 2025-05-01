@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -35,20 +36,23 @@ public class SecurityConfig {
 			)
 			// 엔드포인트별 권한 설정
 			.authorizeHttpRequests(auth -> auth
-				// 로그인·가입·비밀번호 재설정 관련 경로는 모두 허용
+				// 1) 로그인/회원가입/비밀번호 재설정 요청은 모두 허용
 				.requestMatchers(
 					"/user/command/login",
+					"/user/command/logout",
 					"/user/command/register",
-					"/user/command/reset-password/**"  // GET/POST 모두 허용
+					"/user/command/request-password-reset",
+					"/user/command/reset-password",
+					// 아이디 찾기 API (public 으로 열려있어야 한다면)
+					"/user/query/email"
 				).permitAll()
-				// 그 외 모든 요청은 인증 필요
-				/* 일단 모든 요청에 대해 권한 필요 없게 설정해놨음. */
-				.anyRequest().permitAll()
+				// 2) 그 외 모든 요청은 인증된 사용자만
+				.anyRequest().authenticated()
 			)
 			// JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
 			.addFilterBefore(
 				new JwtAuthenticationFilter(jwtUtil),
-				org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class
+				UsernamePasswordAuthenticationFilter.class
 			)
 			// 기본 HTTP Basic 은 그대로 두되, 주로 JWT 만 사용
 			.httpBasic(Customizer.withDefaults());
