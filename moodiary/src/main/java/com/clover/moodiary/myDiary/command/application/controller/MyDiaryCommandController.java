@@ -49,7 +49,7 @@ public class MyDiaryCommandController {
     }
 
     @DeleteMapping("/{diaryId}")
-    public ResponseEntity<?> deleteDiary(@PathVariable Integer diaryId) {
+    public ResponseEntity<?> deleteDiary(@PathVariable(value = "diaryId") Integer diaryId) {
         try {
             myDiaryCommandService.deleteDiary(diaryId);
             return ResponseEntity.ok("일기 삭제(소프트 딜리트) 완료");

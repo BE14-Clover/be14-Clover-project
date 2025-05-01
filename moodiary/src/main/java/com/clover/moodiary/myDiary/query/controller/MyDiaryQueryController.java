@@ -27,7 +27,7 @@ public class MyDiaryQueryController {
     private final MyDiaryQueryService myDiaryQueryService;
 
     @GetMapping("/monthly")
-    public List<MonthlyDiaryDTO> getMonthlyDiaries(@RequestParam String targetMonth) {
+    public List<MonthlyDiaryDTO> getMonthlyDiaries(@RequestParam(value = "targetMonth") String targetMonth) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Integer userId = (Integer)auth.getPrincipal();
@@ -37,7 +37,7 @@ public class MyDiaryQueryController {
     }
 
     @GetMapping("/moodlog")
-    public MoodlogDTO getMoodlog(@RequestParam String targetMonth) {
+    public MoodlogDTO getMoodlog(@RequestParam(value = "targetMonth") String targetMonth) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Integer userId = (Integer)auth.getPrincipal();
@@ -47,8 +47,8 @@ public class MyDiaryQueryController {
     }
 
     @GetMapping("/weekly")
-    public List<WeeklyDiaryDTO> getWeeklyDiaries(@RequestParam String startDate,
-                                                 @RequestParam String endDate) {
+    public List<WeeklyDiaryDTO> getWeeklyDiaries(@RequestParam(value = "startDate") String startDate,
+                                                 @RequestParam(value = "endDate") String endDate) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Integer userId = (Integer)auth.getPrincipal();
@@ -58,7 +58,7 @@ public class MyDiaryQueryController {
     }
 
     @GetMapping("/daily")
-    public MyDiaryDTO getDiaryByDate(@RequestParam("date")
+    public MyDiaryDTO getDiaryByDate(@RequestParam(value = "date")
                                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
