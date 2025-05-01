@@ -12,4 +12,4 @@ WORKDIR /app
 COPY --from=build /app/moodiary/build/libs/*.jar ./
 RUN mv $(ls *.jar | grep -v plain) app.jar
 ## 컨테이너 내부에서는 8080포트로 app.jar가 실행 됨
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Dfile.encoding=UTF-8", "-jar", "app.jar"]
