@@ -7,6 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/shareddiary")
@@ -16,18 +19,15 @@ public class SharedDiaryCommandController {
     private final SharedDiaryCommandService sharedDiaryCommandService;
 
     @PostMapping("/create")
-    public ResponseEntity<CreateSharedDiaryResponse> createDiary(@RequestBody CreateSharedDiaryRequest request) {
+    public ResponseEntity<CreateSharedDiaryResponse> createDiary(
+            @RequestPart("data") CreateSharedDiaryRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) throws IOException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Integer userId = (Integer) auth.getPrincipal();
 
-        CreateSharedDiaryRequest fixedRequest = new CreateSharedDiaryRequest(
-                request.getRoomId(),
-                userId,
-                request.getTitle(),
-                request.getContent(),
-                request.getStyleLayer()
-        );
-        return ResponseEntity.ok(sharedDiaryCommandService.createDiary(fixedRequest));
+        request.setUserId(userId);
+        return ResponseEntity.ok(sharedDiaryCommandService.createDiary(request, image));
     }
 
     @PutMapping("/update")
