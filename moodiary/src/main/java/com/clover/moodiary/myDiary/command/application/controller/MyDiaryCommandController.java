@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @Slf4j
@@ -62,6 +63,17 @@ public class MyDiaryCommandController {
         } catch (Exception e) {
             log.error("일기 수정 중 서버 오류", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류 발생");
+        }
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
+        try {
+            String imageUrl = s3Uploader.upload(file);
+            return ResponseEntity.ok().body(Map.of("url", imageUrl));
+        } catch (IOException e) {
+            log.error("S3 업로드 실패", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이미지 업로드 실패");
         }
     }
 
