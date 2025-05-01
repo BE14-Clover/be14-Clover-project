@@ -133,7 +133,7 @@
              , a.content
              , a.created_at
              , a.is_confirmed
-             , a,style_layer
+             , a.style_layer
              , b.total_score
           FROM my_diary a
           LEFT JOIN emotion_analyze b ON a.id = b.my_diary_id
