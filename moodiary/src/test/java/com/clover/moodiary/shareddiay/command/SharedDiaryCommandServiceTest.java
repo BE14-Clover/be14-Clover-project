@@ -27,14 +27,17 @@ public class SharedDiaryCommandServiceTest {
     @DisplayName("공유 일기 작성 테스트")
     @ValueSource(ints = {1})
     public void createSharedDiaryTest(int userId) {
-
         Integer roomId = 1;
         String title = "오늘의 일기";
         String content = "따뜻한 커피와 함께 시작한 하루.";
         String styleLayer = "[{\"type\":\"sticker\",\"src\":\"heart.png\",\"x\":100,\"y\":120}]";
 
         CreateSharedDiaryRequest request = new CreateSharedDiaryRequest(
-                roomId, userId, title, content, styleLayer
+                roomId,
+                userId,
+                title,
+                content,
+                styleLayer
         );
 
         Integer diaryId = sharedDiaryCommandService.createDiary(request).getId();
@@ -45,17 +48,18 @@ public class SharedDiaryCommandServiceTest {
         Assertions.assertEquals(title, diary.getTitle());
         Assertions.assertEquals(content, diary.getContent());
         Assertions.assertEquals(styleLayer, diary.getStyleLayer());
-        Assertions.assertEquals(roomId,diary.getSharedDiaryRoomId());
+        Assertions.assertEquals(roomId, diary.getSharedDiaryRoomId());
     }
 
     @ParameterizedTest
     @DisplayName("공유 일기 수정 테스트")
     @ValueSource(ints = {10})
     public void updateSharedDiaryTest(int diaryId) {
+        int userId = 1;
 
         UpdateSharedDiaryRequest request = new UpdateSharedDiaryRequest(
                 diaryId,
-                1,
+                userId,
                 "수정된 일기 제목",
                 "오늘은 정말 잊지 못할 하루였다. 커피 향이 마음을 가득 채웠지.",
                 "[{\"type\":\"sticker\",\"src\":\"star.png\",\"x\":150,\"y\":200}]"
@@ -64,7 +68,6 @@ public class SharedDiaryCommandServiceTest {
         UpdateSharedDiaryReponse response = sharedDiaryCommandService.updateDiary(request);
 
         SharedDiary diary = sharedDiaryRepository.findById(response.getDiaryId()).orElse(null);
-
         Assertions.assertNotNull(diary);
         Assertions.assertEquals(request.getTitle(), diary.getTitle());
         Assertions.assertEquals(request.getContent(), diary.getContent());
@@ -76,14 +79,14 @@ public class SharedDiaryCommandServiceTest {
     @DisplayName("공유 일기 삭제 테스트")
     @ValueSource(ints = {10})
     public void deleteSharedDiaryTest(int diaryId) {
+        int userId = 1;
 
-        DeleteSharedDiaryRequest request = new DeleteSharedDiaryRequest(diaryId);
+        DeleteSharedDiaryRequest request = new DeleteSharedDiaryRequest(diaryId, userId);
 
         sharedDiaryCommandService.deleteDiary(request);
 
-        SharedDiary deleteDiary = sharedDiaryRepository.findById(diaryId).orElse(null);
-        Assertions.assertNotNull(deleteDiary);
-        Assertions.assertEquals("Y",deleteDiary.getIsDeleted());
-
+        SharedDiary deletedDiary = sharedDiaryRepository.findById(diaryId).orElse(null);
+        Assertions.assertNotNull(deletedDiary);
+        Assertions.assertEquals("Y", deletedDiary.getIsDeleted());
     }
 }
