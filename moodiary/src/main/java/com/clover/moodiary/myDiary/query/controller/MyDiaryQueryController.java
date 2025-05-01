@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -25,37 +27,53 @@ public class MyDiaryQueryController {
     private final MyDiaryQueryService myDiaryQueryService;
 
     @GetMapping("/monthly")
-    public List<MonthlyDiaryDTO> getMonthlyDiaries(@RequestParam String targetMonth,
-                                               @RequestParam int userId) {
+    public List<MonthlyDiaryDTO> getMonthlyDiaries(@RequestParam String targetMonth) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Integer userId = (Integer)auth.getPrincipal();
+
         log.info("요청 받은 월간 일기 조회의 userId: {}, targetMonth: {}", userId, targetMonth);
         return myDiaryQueryService.getDiaryForMonth(targetMonth, userId);
     }
 
     @GetMapping("/moodlog")
-    public MoodlogDTO getMoodlog(@RequestParam String targetMonth,
-                                 @RequestParam int userId) {
+    public MoodlogDTO getMoodlog(@RequestParam String targetMonth) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Integer userId = (Integer)auth.getPrincipal();
+
         log.info("요청 받은 Moodlog 조회의 userId: {}, targetMonth: {}", userId, targetMonth);
         return myDiaryQueryService.getMoodlog(targetMonth, userId);
     }
 
     @GetMapping("/weekly")
     public List<WeeklyDiaryDTO> getWeeklyDiaries(@RequestParam String startDate,
-                                                 @RequestParam String endDate,
-                                                 @RequestParam int userId) {
+                                                 @RequestParam String endDate) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Integer userId = (Integer)auth.getPrincipal();
+
         log.info("주간 일기 조회 요청 - userId: {}, startDate: {}, endDate: {}", userId, startDate, endDate);
         return myDiaryQueryService.getDiaryForWeek(startDate, endDate, userId);
     }
 
     @GetMapping("/daily")
-    public MyDiaryDTO getDiaryByDate(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-                                     @RequestParam("userId") int userId) {
+    public MyDiaryDTO getDiaryByDate(@RequestParam("date")
+                                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Integer userId = (Integer)auth.getPrincipal();
+
         log.info("🇰🇷 한국시간 일기 조회 요청 - userId: {}, date: {}", userId, date);
         return myDiaryQueryService.getDiaryByDateKST(date, userId);
     }
 
     @GetMapping("/daily/{date}")
-    public MyDiaryDTO getDiaryByDate(@PathVariable("date") String date,
-                                     @RequestParam("userId") int userId) {
+    public MyDiaryDTO getDiaryByDate(@PathVariable("date") String date) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Integer userId = (Integer)auth.getPrincipal();
+
         log.info("일기 조회 요청 - userId: {}, date: {}", userId, date);
         try {
             LocalDate diaryDate = LocalDate.parse(date);
