@@ -1,6 +1,7 @@
 package com.clover.moodiary.pets.command.domain.aggregate.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "user_pet")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class UserPetEntity {
 
     @Id
