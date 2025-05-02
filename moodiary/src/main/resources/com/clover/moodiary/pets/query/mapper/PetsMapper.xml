@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.clover.moodiary.pets.query.mapper.PetsMapper">
+
+    <select id="findPetByUserId" resultType="com.clover.moodiary.pets.query.dto.PetsQueryDTO">
+        SELECT a.id AS id,
+               a.pet_name AS petName,
+               a.pet_img AS petImg
+        FROM user_pet b
+        JOIN pet a ON b.pet_id = a.id
+        WHERE b.user_id = #{userId}
+    </select>
+
+</mapper>
