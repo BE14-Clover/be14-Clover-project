@@ -1,0 +1,813 @@
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS USER_PREFERENCES CASCADE;
+DROP TABLE IF EXISTS TAGGED_RECOMMENDED_ACTIONS CASCADE;
+DROP TABLE IF EXISTS user_pet CASCADE;
+DROP TABLE IF EXISTS pet CASCADE;
+DROP TABLE IF EXISTS emotion_analyze CASCADE;
+DROP TABLE IF EXISTS picture CASCADE;
+DROP TABLE IF EXISTS my_diary_tag CASCADE;
+DROP TABLE IF EXISTS tag CASCADE;
+DROP TABLE IF EXISTS sticker CASCADE;
+DROP TABLE IF EXISTS my_diary CASCADE;
+DROP TABLE IF EXISTS shared_diary_comment CASCADE;
+DROP TABLE IF EXISTS shared_diary CASCADE;
+DROP TABLE IF EXISTS shared_diary_room CASCADE;
+DROP TABLE IF EXISTS moodlog CASCADE;
+DROP TABLE IF EXISTS user CASCADE;
+DROP TABLE IF EXISTS register_questions CASCADE;
+DROP TABLE IF EXISTS ACTION_TAG CASCADE;
+DROP TABLE IF EXISTS RECOMMENDED_ACTIONS CASCADE;
+DROP TABLE IF EXISTS password_reset_token CASCADE;
+DROP TABLE IF EXISTS refresh_token CASCADE;
+DROP TABLE IF EXISTS jwt_blacklist CASCADE;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+CREATE TABLE register_questions
+(
+    id                         INT          NOT NULL AUTO_INCREMENT,
+    register_questions_content VARCHAR(255) NOT NULL UNIQUE,
+    CONSTRAINT pk_register_questions PRIMARY KEY (id)
+);
+
+CREATE TABLE user
+(
+    id                    INT          NOT NULL AUTO_INCREMENT,
+    name                  VARCHAR(30)  NOT NULL,
+    phone_number          VARCHAR(15)  NOT NULL UNIQUE,
+    email                 VARCHAR(255) NOT NULL UNIQUE,
+    password              VARCHAR(255) NOT NULL,
+    is_deleted            VARCHAR(4)   NOT NULL DEFAULT 'N',
+    answer                VARCHAR(255) NOT NULL,
+    register_questions_id INT          NOT NULL,
+    CONSTRAINT pk_user PRIMARY KEY (id),
+    CONSTRAINT fk_user_to_register_questions FOREIGN KEY (register_questions_id)
+        REFERENCES register_questions (id)
+);
+
+CREATE TABLE IF NOT EXISTS moodlog
+(
+    id      INT      NOT NULL AUTO_INCREMENT,
+    content TEXT     NOT NULL,
+    month   DATETIME NOT NULL,
+    user_id INT      NOT NULL,
+    CONSTRAINT pk_moodlog PRIMARY KEY (id),
+    CONSTRAINT fk_moodlog_user_id FOREIGN KEY (user_id) REFERENCES user (id)
+) ENGINE = INNODB
+  AUTO_INCREMENT = 1 COMMENT ='개인 월간 기록'
+  DEFAULT CHARSET UTF8;
+
+
+CREATE TABLE IF NOT EXISTS my_diary
+(
+    id           INT          NOT NULL AUTO_INCREMENT,
+    title        VARCHAR(255) NULL COMMENT '제목 없으면 해당 날짜 DATE 형식으로 작성됨',
+    content      TEXT         NOT NULL,
+    created_at   DATETIME     NOT NULL,
+    is_deleted   VARCHAR(4)   NOT NULL DEFAULT 'N' COMMENT '소프트 딜리트',
+    is_confirmed VARCHAR(4)   NOT NULL DEFAULT 'N' COMMENT '확정 Y, 확정 N (04시에 스케줄러로 일괄처리)',
+    style_layer  TEXT         NULL,
+    user_id      INT          NOT NULL,
+    CONSTRAINT pk_my_diary_id PRIMARY KEY (id),
+    CONSTRAINT fk_my_diary_user_id FOREIGN KEY (user_id) REFERENCES user (id)
+);
+
+
+CREATE TABLE IF NOT EXISTS emotion_analyze
+(
+    id               INT          NOT NULL AUTO_INCREMENT,
+    total_score      INT          NOT NULL,
+    positive_score   INT          NOT NULL,
+    neutral_score    INT          NOT NULL,
+    negative_score   INT          NOT NULL,
+    emotion_summary1 VARCHAR(255) NOT NULL,
+    emotion_summary2 VARCHAR(255) NOT NULL,
+    emotion_summary3 VARCHAR(255) NOT NULL,
+    my_diary_summary VARCHAR(255) NOT NULL,
+    my_diary_id      INT          NOT NULL,
+    CONSTRAINT pk_emotion_analyze_id PRIMARY KEY (id),
+    CONSTRAINT fk_emotion_analyze_my_diary_id FOREIGN KEY (my_diary_id) REFERENCES my_diary (id)
+);
+
+
+CREATE TABLE IF NOT EXISTS tag
+(
+    id       INT          NOT NULL AUTO_INCREMENT,
+    tag_name VARCHAR(255) NOT NULL UNIQUE,
+    CONSTRAINT pk_tag_id PRIMARY KEY (id)
+);
+
+
+CREATE TABLE IF NOT EXISTS my_diary_tag
+(
+    my_diary_id INT NOT NULL,
+    tag_id      INT NOT NULL,
+    CONSTRAINT pk_my_diary_tag PRIMARY KEY (my_diary_id, tag_id),
+    CONSTRAINT fk_my_diary_tag_my_diary_id FOREIGN KEY (my_diary_id) REFERENCES my_diary (id),
+    CONSTRAINT fk_my_diary_tag_tag_id FOREIGN KEY (tag_id) REFERENCES tag (id)
+);
+
+
+CREATE TABLE shared_diary_room
+(
+    id       INT AUTO_INCREMENT COMMENT '공유 일기 방 id',
+    user_id1 INT NOT NULL COMMENT '유저 id1',
+    user_id2 INT NULL COMMENT '유저 id2',
+    CONSTRAINT pk_shared_diary_room_id PRIMARY KEY (id),
+    CONSTRAINT fk_shared_diary_room_user_id1 FOREIGN KEY (user_id1) REFERENCES user (id),
+    CONSTRAINT fk_shared_diary_room_user_id2 FOREIGN KEY (user_id2) REFERENCES user (id)
+);
+
+
+CREATE TABLE shared_diary
+(
+    id                   INT AUTO_INCREMENT COMMENT '공유 일기 id',
+    title                VARCHAR(255) NULL COMMENT '일기 제목',
+    content              TEXT         NOT NULL COMMENT '일기 내용',
+    created_at           DATETIME     NOT NULL COMMENT '작성 시간',
+    is_deleted           VARCHAR(4)   NOT NULL DEFAULT 'N' COMMENT '삭제 여부',
+    fixed_state          VARCHAR(4)   NOT NULL DEFAULT 'N' COMMENT '작성 상태',
+    style_layer          LONGTEXT     NULL COMMENT '스티커 레이어',
+    shared_diary_room_id INT          NOT NULL COMMENT '공유 일기 방 id',
+    user_id              INT          NOT NULL COMMENT '작성자 id',
+    CONSTRAINT pk_shared_diary_id PRIMARY KEY (id),
+    CONSTRAINT fk_shared_diary_shared_diary_room_id FOREIGN KEY (shared_diary_room_id) REFERENCES shared_diary_room (id),
+    CONSTRAINT fk_shared_diary_user_id FOREIGN KEY (user_id) REFERENCES user (id)
+);
+
+
+CREATE TABLE shared_diary_comment
+(
+    id              INT AUTO_INCREMENT COMMENT '공유 일기 댓글 id',
+    comment_content VARCHAR(255) NOT NULL COMMENT '댓글 내용',
+    created_at      DATETIME     NOT NULL COMMENT '작성 시간',
+    is_deleted      VARCHAR(4)   NOT NULL DEFAULT 'N' COMMENT '삭제 여부',
+    shared_diary_id INT          NOT NULL COMMENT '공유 일기 id',
+    user_id         INT          NOT NULL COMMENT '작성자 id',
+    CONSTRAINT pk_shared_diary_comment_id PRIMARY KEY (id),
+    CONSTRAINT fk_shared_diary_comment_shared_diary_id FOREIGN KEY (shared_diary_id) REFERENCES shared_diary (id),
+    CONSTRAINT fk_shared_diary_comment_user_id FOREIGN KEY (user_id) REFERENCES user (id)
+);
+
+
+CREATE TABLE IF NOT EXISTS picture
+(
+    id              INT  NOT NULL AUTO_INCREMENT,
+    image_path      TEXT NOT NULL,
+    my_diary_id     INT  NULL,
+    shared_diary_id INT  NULL,
+    CONSTRAINT pk_picture_id PRIMARY KEY (id),
+    CONSTRAINT fk_picture_my_diary_id FOREIGN KEY (my_diary_id) REFERENCES my_diary (id) ON DELETE CASCADE,
+    CONSTRAINT fk_picture_shared_diary_id FOREIGN KEY (shared_diary_id) REFERENCES shared_diary (id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE pet
+(
+    id       INT          NOT NULL AUTO_INCREMENT,
+    pet_name VARCHAR(30)  NOT NULL,
+    pet_img  VARCHAR(255) NOT NULL,
+    CONSTRAINT pk_pet PRIMARY KEY (id)
+);
+
+
+CREATE TABLE user_pet
+(
+    user_id INT NOT NULL,
+    pet_id  INT NOT NULL,
+    CONSTRAINT pk_user_pet PRIMARY KEY (user_id, pet_id),
+    CONSTRAINT fk_user_pet_to_user FOREIGN KEY (user_id) REFERENCES user (id),
+    CONSTRAINT fk_user_pet_to_pet FOREIGN KEY (pet_id) REFERENCES pet (id)
+);
+
+
+CREATE TABLE IF NOT EXISTS RECOMMENDED_ACTIONS
+(
+    id     INT          NOT NULL AUTO_INCREMENT COMMENT '추천 행동 ID',
+    action VARCHAR(255) NOT NULL COMMENT '추천 행동',
+    CONSTRAINT pk_recommended_actions PRIMARY KEY (id)
+) ENGINE = INNODB
+  AUTO_INCREMENT = 1
+  DEFAULT CHARSET UTF8;
+
+CREATE TABLE IF NOT EXISTS ACTION_TAG
+(
+    id                   INT          NOT NULL AUTO_INCREMENT COMMENT '행동 태그 ID',
+    name                 VARCHAR(255) NOT NULL COMMENT '행동 태그 이름',
+    parent_action_tag_id INT          NULL COMMENT '상위(부모) 행동 태그 ID',
+    CONSTRAINT pk_action_tag PRIMARY KEY (id),
+    CONSTRAINT fk_parent_action_tag_id FOREIGN KEY (parent_action_tag_id) REFERENCES ACTION_TAG (id)
+) ENGINE = INNODB
+  AUTO_INCREMENT = 1
+  DEFAULT CHARSET UTF8;
+
+CREATE TABLE IF NOT EXISTS TAGGED_RECOMMENDED_ACTIONS
+(
+    recommended_actions_id INT NOT NULL COMMENT '추천 행동 ID',
+    action_tag_id          INT NOT NULL COMMENT '행동 태그 ID',
+    CONSTRAINT pk_tagged_recommended_actions PRIMARY KEY (recommended_actions_id, action_tag_id),
+    CONSTRAINT fk_tagged_recommended_actions_recommended_actions_id FOREIGN KEY (recommended_actions_id) REFERENCES RECOMMENDED_ACTIONS (id),
+    CONSTRAINT fk_tagged_recommended_actions_action_tag_id FOREIGN KEY (action_tag_id) REFERENCES ACTION_TAG (id)
+) ENGINE = INNODB
+  AUTO_INCREMENT = 1
+  DEFAULT CHARSET UTF8;
+
+CREATE TABLE IF NOT EXISTS USER_PREFERENCES
+(
+    user_id             INT      NOT NULL COMMENT '유저 ID',
+    action_tag_id       INT      NOT NULL COMMENT '행동 태그 ID',
+    weight              INT      NOT NULL DEFAULT 50 COMMENT '가중치',
+    last_recommended_at DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP) COMMENT '마지막 추천 시간',
+    CONSTRAINT pk_user_preferences PRIMARY KEY (user_id, action_tag_id),
+    CONSTRAINT fk_user_preferences_user_id FOREIGN KEY (user_id) REFERENCES user (id),
+    CONSTRAINT fk_user_preferences_action_tag_id FOREIGN KEY (action_tag_id) REFERENCES ACTION_TAG (id)
+) ENGINE = INNODB
+  AUTO_INCREMENT = 1
+  DEFAULT CHARSET UTF8;
+
+
+CREATE TABLE IF NOT EXISTS password_reset_token
+(
+    id         INT          NOT NULL AUTO_INCREMENT,
+    token      VARCHAR(255) NOT NULL UNIQUE COMMENT '비밀번호 재설정용 랜덤 토큰',
+    expires_at DATETIME     NOT NULL COMMENT '토큰 만료 시각',
+    user_id    INT          NOT NULL COMMENT '대상 유저 ID',
+    CONSTRAINT pk_password_reset_token PRIMARY KEY (id),
+    CONSTRAINT fk_prt_user FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4 COMMENT ='비밀번호 재설정 토큰 관리';
+
+
+CREATE TABLE IF NOT EXISTS refresh_token
+(
+    id         INT          NOT NULL AUTO_INCREMENT,
+    token      VARCHAR(255) NOT NULL UNIQUE COMMENT '리프레시 토큰',
+    issued_at  DATETIME     NOT NULL COMMENT '발급 시각',
+    expires_at DATETIME     NOT NULL COMMENT '만료 시각',
+    user_id    INT          NOT NULL COMMENT '대상 유저 ID',
+    CONSTRAINT pk_refresh_token PRIMARY KEY (id),
+    CONSTRAINT fk_rt_user FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4 COMMENT ='리프레시 토큰 관리';
+
+
+CREATE TABLE IF NOT EXISTS jwt_blacklist
+(
+    token          VARCHAR(500) NOT NULL PRIMARY KEY COMMENT '무효화된 액세스 토큰',
+    blacklisted_at DATETIME     NOT NULL COMMENT '블랙리스트 등록 시각'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4 COMMENT ='무효화된 JWT 토큰 목록';
+
+
+ALTER TABLE password_reset_token
+    ADD CONSTRAINT uq_prt_user UNIQUE (user_id);
+
+INSERT INTO register_questions (register_questions_content)
+VALUES ('당신의 어릴 적 별명은 무엇입니까?'),
+       ('어머니의 성함은 무엇입니까?'),
+       ('당신이 태어난 도시 이름은 무엇입니까?'),
+       ('첫 번째로 키운 반려동물의 이름은 무엇입니까?'),
+       ('당신이 졸업한 초등학교 이름은 무엇입니까?'),
+       ('졸업한 고등학교 이름은 무엇입니까?'),
+       ('처음 근무했던 회사 이름은 무엇입니까?'),
+       ('기억에 남는 선생님의 이름은 무엇입니까?'),
+       ('인생에서 처음 본 영화는 무엇입니까?'),
+       ('나의 꿈의 직업은 무엇입니까?');
+
+INSERT INTO user (id, name, phone_number, email, password, is_deleted, answer, register_questions_id)
+VALUES (-1, '관리자', '010-0000-0000', 'ADMIN@moodiary.com',
+        '$2a$10$mE2/0khQFVKsELdzmfzpduXv92iYQgDujd469fIMJ.qxnjKr3AlN.', 'N', '-', 1),
+       (1, '강수지', '010-1234-5678', 'rkd50071@gmail.com', '$2a$10$mE2/0khQFVKsELdzmfzpduXv92iYQgDujd469fIMJ.qxnjKr3AlN.',
+        'N', '부산', 3),
+       (2, '고성연', '010-2345-6789', 'rhtjddus0502@gmail.com',
+        '$2a$10$mE2/0khQFVKsELdzmfzpduXv92iYQgDujd469fIMJ.qxnjKr3AlN.', 'N', '초코', 4),
+       (3, '고윤석', '010-3456-7890', 'jakego13129@gmail.com',
+        '$2a$10$mE2/0khQFVKsELdzmfzpduXv92iYQgDujd469fIMJ.qxnjKr3AlN.', 'N', '개발자', 10),
+       (4, '김성민', '010-4567-8901', 'sungmin806@gmail.com',
+        '$2a$10$mE2/0khQFVKsELdzmfzpduXv92iYQgDujd469fIMJ.qxnjKr3AlN.', 'N', '주토피아', 9),
+       (5, '이청민', '010-5678-9012', 'charlie4822@gmail.com',
+        '$2a$10$mE2/0khQFVKsELdzmfzpduXv92iYQgDujd469fIMJ.qxnjKr3AlN.', 'N', '개발자', 1);
+
+INSERT INTO pet (id, pet_name, pet_img)
+VALUES (1, '공룡', 'https://i.pinimg.com/originals/05/79/d4/0579d4e6568c980df96b447fbc358014.gif'),
+       (2, '강아지', 'https://i.pinimg.com/736x/23/db/6e/23db6e1fe41c5ce16f1f6b577fd95e0f.jpg'),
+       (3, '오리', 'https://i.pinimg.com/originals/71/88/0f/71880f60fc9fa0973ef856dffed68e80.gif'),
+       (4, '고양이', 'https://i.pinimg.com/736x/30/14/89/301489e41d6da1b4177ca7655daad80d.jpg');
+
+INSERT INTO shared_diary_room (id, user_id1, user_id2)
+VALUES (1, 1, 2),
+       (2, 3, 4),
+       (3, 5, 1);
+
+INSERT INTO shared_diary (id, title, content, created_at, is_deleted, fixed_state, shared_diary_room_id, user_id)
+VALUES (1, '무지개가 뜬 오후, 너와 함께한 따뜻한 시간',
+        '오늘은 정말 특별했어. 비가 멈추고 무지개가 떠오른 그 순간, 너와 함께라는 게 얼마나 큰 위로가 되는지 새삼 느꼈거든. 힘든 일도 많았지만, 네 손을 잡고 걷는 이 길은 마치 아무것도 아닌 듯하게 느껴졌어. 그런 평범함 속에서 행복을 찾게 되는 하루였어.',
+        '2025-04-21 11:00:00', 'N', 'Y', 1, 1),
+       (2, '잔잔한 음악 속, 너와 함께한 조용한 카페 데이트',
+        '잔잔한 음악이 흐르는 카페에서 네 옆에 앉아 있던 그 시간, 말없이 눈을 맞추던 순간이 아직도 머릿속을 맴돌아. 우리가 함께하는 고요한 공간이 세상에서 제일 아늑했어. 커피보다 더 따뜻한 건 네 눈빛이었고, 책보다 더 재미있는 건 너였어.',
+        '2025-04-21 13:00:00', 'N', 'Y', 1, 1),
+       (3, '길을 잃어도 좋았던 그 산책길, 너만 있다면',
+        '처음 가보는 산책길이었지만, 너랑 함께라서 전혀 두렵지 않았어. 길을 잠깐 잃기도 했지만 그마저도 즐거운 모험 같았고, 우리가 나눈 대화와 웃음이 그 길을 가장 좋은 기억으로 남게 해줬어. 너와 함께라면 어디든 좋아.',
+        '2025-04-21 15:00:00', 'N', 'Y', 1, 1),
+       (4, '회색 하늘 아래, 네 미소로 물든 하루',
+        '오늘은 종일 흐린 하늘이었지만, 너의 웃음 하나로 모든 게 환해졌어. 특별한 계획도 없었고, 맛있는 것도 안 먹었지만 이상하게 하루 종일 기분이 좋았어. 이런 일상이 얼마나 고마운지, 너라는 사람이 얼마나 소중한지 느낀 하루였어.',
+        '2025-04-21 12:00:00', 'N', 'Y', 1, 2),
+       (5, '무지개 아래 약속한 다음 만남',
+        '무지개가 떠 있는 하늘 아래에서 너와 나란히 걷던 그 순간, 문득 "우리의 미래도 이렇게 찬란했으면 좋겠다"는 생각이 들었어. 손끝이 닿을 듯한 거리에 있는 너와 함께라면, 어떤 날씨도 어떤 기분도 다 괜찮을 것 같아.',
+        '2025-04-21 14:00:00', 'N', 'Y', 1, 2),
+       (6, '한 장의 책, 두 사람의 온도',
+        '카페 구석에 앉아 함께 읽은 책 한 장 한 장마다 우리 이야기처럼 느껴졌어. 말은 없었지만, 그 고요 속에서 네가 내게 얼마나 소중한 사람인지 다시 느꼈어. 커피향보다 짙은 네 온기 덕분에 마음이 참 따뜻했어.',
+        '2025-04-21 16:00:00', 'N', 'Y', 1, 2),
+       (7, '낯선 길, 낯설지 않은 너',
+        '새로운 산책길은 조금 어색했지만, 네가 손을 잡아주니까 그 길이 금세 익숙해졌어. 중간에 마주친 강아지한테 우리가 둘 다 눈을 빼앗겨 웃었던 것도 아직도 생생해. 우리의 걸음마다 기억이 하나씩 쌓이는 것 같아.',
+        '2025-04-21 13:00:00', 'N', 'Y', 3, 5),
+       (8, '길고양이도 부러워할 우리의 하루',
+        '오늘따라 네 미소가 더 눈부셨던 것 같아. 길고양이에게 간식도 주고, 네가 좋아하는 편의점 간식도 같이 나눠 먹으며 웃었던 시간이 아직도 생생해. 너랑 함께하는 하루는 늘 특별하고, 내일도 그랬으면 좋겠어.',
+        '2025-04-21 15:00:00', 'N', 'Y', 3, 1),
+       (9, '커피보다 진했던 너의 한마디',
+        '너와 마주 앉아 커피를 마시며 나눈 이야기들, 그 짧은 시간 속에서 참 많은 감정이 오갔던 것 같아. 네가 내 손을 살짝 잡아줬을 때, 별말 없이도 다 이해받는 기분이었어. 오늘처럼, 앞으로도 오래 함께하고 싶어.',
+        '2025-04-21 17:00:00', 'N', 'Y', 3, 5);
+
+
+INSERT INTO shared_diary_comment (id, comment_content, created_at, is_deleted, shared_diary_id, user_id)
+VALUES (1, '무지개 보러 갔다가 너한테 더 반했잖아, 기억나?', '2025-04-21 20:01:00', 'N', 1, 1),
+       (2, '그날 하늘처럼, 너랑 함께한 순간이 내 마음을 환하게 밝혔어.', '2025-04-21 20:02:00', 'N', 1, 1),
+       (3, '무지개도 예뻤지만, 그걸 바라보는 네 눈빛이 더 아름다웠어.', '2025-04-21 20:03:00', 'N', 1, 1),
+       (4, '조용한 카페였는데, 네가 있어서 마음이 더 따뜻해졌어.', '2025-04-21 20:04:00', 'N', 2, 2),
+       (5, '책보다 너를 보는 게 더 좋았어. 다음엔 내가 커피 살게 ☕', '2025-04-21 20:05:00', 'N', 2, 2),
+       (6, '그날 마신 커피보다, 네 말 한마디가 더 진했어.', '2025-04-21 20:06:00', 'N', 2, 2),
+       (7, '네가 있어서 낯선 길도 익숙했어. 우리 다음에도 또 걷자.', '2025-04-21 20:07:00', 'N', 3, 1),
+       (8, '그 산책길, 우리 둘만의 추억으로 남았어. 또 가자!', '2025-04-21 20:08:00', 'N', 3, 1),
+       (9, '강아지보다 네 웃는 얼굴이 더 귀여웠어 🐶', '2025-04-21 20:09:00', 'N', 3, 1),
+       (10, '네 글을 읽으면서 나도 모르게 웃고 있었어. 참 신기하지?', '2025-04-21 20:10:00', 'N', 4, 4),
+       (11, '네가 느낀 하루를 이렇게 함께 나눠줘서 너무 고마워.', '2025-04-21 20:11:00', 'N', 4, 4),
+       (12, '언제나처럼 너는 내 하루를 특별하게 만들어줘.', '2025-04-21 20:12:00', 'N', 4, 4),
+       (13, '무지개 보러 갔다가 너한테 더 반했잖아, 기억나?', '2025-04-21 20:13:00', 'N', 5, 3),
+       (14, '무지개도 예뻤지만, 그걸 바라보는 네 눈빛이 더 아름다웠어.', '2025-04-21 20:14:00', 'N', 5, 3),
+       (15, '그날 하늘처럼, 너랑 함께한 순간이 내 마음을 환하게 밝혔어.', '2025-04-21 20:15:00', 'N', 5, 3),
+       (16, '그날 마신 커피보다, 네 말 한마디가 더 진했어.', '2025-04-21 20:16:00', 'N', 6, 4),
+       (17, '책보다 너를 보는 게 더 좋았어. 다음엔 내가 커피 살게 ☕', '2025-04-21 20:17:00', 'N', 6, 4),
+       (18, '네가 있어서 낯선 길도 익숙했어. 우리 다음에도 또 걷자.', '2025-04-21 20:18:00', 'N', 7, 5),
+       (19, '강아지보다 네 웃는 얼굴이 더 귀여웠어 🐶', '2025-04-21 20:19:00', 'N', 7, 5),
+       (20, '그 산책길, 우리 둘만의 추억으로 남았어. 또 가자!', '2025-04-21 20:20:00', 'N', 7, 5),
+       (21, '네가 느낀 하루를 이렇게 함께 나눠줘서 너무 고마워.', '2025-04-21 20:21:00', 'N', 8, 1),
+       (22, '네 글을 읽으면서 나도 모르게 웃고 있었어. 참 신기하지?', '2025-04-21 20:22:00', 'N', 8, 1),
+       (23, '언제나처럼 너는 내 하루를 특별하게 만들어줘.', '2025-04-21 20:23:00', 'N', 8, 1),
+       (24, '책보다 너를 보는 게 더 좋았어. 다음엔 내가 커피 살게 ☕', '2025-04-21 20:24:00', 'N', 9, 5),
+       (25, '조용한 카페였는데, 네가 있어서 마음이 더 따뜻해졌어.', '2025-04-21 20:25:00', 'N', 9, 5);
+
+-- 행동 더미 데이터
+
+INSERT INTO RECOMMENDED_ACTIONS (id, action)
+VALUES (1, '일기 쓰기')
+     , (2, '음악 듣기')
+     , (3, '따뜻한 물로 샤워하기')
+     , (4, '산책하기')
+     , (5, '영화 보기')
+     , (6, '떡볶이 먹기')
+     , (7, '친구와 전화하기')
+     , (8, '웃긴 영상 보기')
+     , (9, '명상하기')
+     , (10, '방 청소하기')
+     , (11, '향초 켜기')
+     , (12, '요가하기')
+     , (13, '차 마시기')
+     , (14, '게임하기')
+     , (15, '새로운 취미 시도하기')
+     , (16, '드라이브하기')
+     , (17, '동물 영상 보기')
+     , (18, '책 읽기')
+     , (19, '그림 그리기')
+     , (20, '퍼즐 맞추기')
+     , (21, '식물 돌보기')
+     , (22, '새로운 레시피로 요리해보기')
+     , (23, '온라인 쇼핑몰 구경하기')
+     , (24, '미래의 나에게 편지 쓰기')
+     , (25, '향수 뿌리기')
+     , (26, '새로운 음악 찾아보기')
+     , (27, '따뜻한 담요에 감싸이기')
+     , (28, '창밖 하늘 보기')
+     , (29, '좋아하는 장면 캡처해서 앨범 만들기')
+     , (30, '사진 찍기')
+     , (31, 'ASMR 듣기')
+     , (32, '쿠션 포옹하기')
+     , (33, 'SNS 쉬기')
+     , (34, '재밌는 밈 모으기')
+     , (35, '보드게임하기')
+     , (36, '긍정적인 문장 소리 내어 말하기')
+     , (37, '하루를 돌아보며 감사한 것 3가지 적기')
+     , (38, '버킷리스트 작성하기')
+     , (39, '옷장 정리하기')
+     , (40, '홈트하기')
+     , (41, '조깅하기')
+     , (42, '손톱 정리하기')
+     , (43, '좋아하는 캐릭터 굿즈 보기')
+     , (44, '과거의 추억 사진 보기')
+     , (45, '고양이나 강아지 산책 시키기')
+     , (46, '온라인으로 전시나 공연 보기')
+     , (47, '가볍게 춤추기')
+     , (48, '마인드맵 그려보기')
+     , (49, '누워서 눈 감고 아무 생각 안 하기')
+     , (50, '오늘 하루 수고했다고 스스로 칭찬하기');
+
+INSERT INTO ACTION_TAG (id, name, parent_action_tag_id)
+VALUES (1, '감정 및 정신건강', NULL)
+     , (2, '힐링 및 휴식', NULL)
+     , (3, '창작 및 표현', NULL)
+     , (4, '운동 및 활동', NULL)
+     , (5, '취미 및 여가', NULL)
+     , (6, '음식 및 음료', NULL)
+     , (7, '동물 관련', NULL)
+     , (8, '학습 및 성장', NULL)
+     , (9, '디지털 디톡스', NULL)
+     , (10, '자기성찰', 1)
+     , (11, '감정정리', 1)
+     , (12, '마음챙김', 1)
+     , (13, '긍정', 1)
+     , (14, '감사', 1)
+     , (15, '힐링', 2)
+     , (16, '셀프케어', 2)
+     , (17, '향기', 2)
+     , (18, '소확행', 2)
+     , (19, '여유', 2)
+     , (20, '스트레스해소', 2)
+     , (21, '감성', 2)
+     , (22, '귀여움', 2)
+     , (23, '글쓰기', 3)
+     , (24, '창작', 3)
+     , (25, '사진', 3)
+     , (26, '정리', 3)
+     , (27, '창의력', 3)
+     , (28, '운동', 4)
+     , (29, '야외활동', 4)
+     , (30, '조깅', 4)
+     , (31, '취미생활', 5)
+     , (32, '게임', 5)
+     , (33, '쇼핑', 5)
+     , (34, '인터넷', 5)
+     , (35, '문화생활', 5)
+     , (36, '미식', 6)
+     , (37, '요리', 6)
+     , (38, '티타임', 6)
+     , (39, '동물', 7)
+     , (40, '자연', 7)
+     , (42, '지식', 8)
+     , (43, '목표설정', 8)
+     , (44, '자기성장', 8)
+     , (45, '디지털디톡스', 9)
+     , (46, '정리정돈', 10)
+     , (47, '청결', 10);
+
+INSERT INTO TAGGED_RECOMMENDED_ACTIONS (recommended_actions_id, action_tag_id)
+VALUES (1, 23)
+     , (1, 10)
+     , (1, 11)
+     , (2, 15)
+     , (2, 26)
+     , (3, 16)
+     , (3, 15)
+     , (4, 29)
+     , (4, 28)
+     , (4, 15)
+     , (5, 26)
+     , (5, 31)
+     , (6, 36)
+     , (6, 18)
+     , (7, 31)
+     , (7, 32)
+     , (8, 34)
+     , (8, 15)
+     , (8, 32)
+     , (9, 12)
+     , (9, 15)
+     , (10, 46)
+     , (10, 16)
+     , (11, 17)
+     , (11, 15)
+     , (12, 28)
+     , (12, 12)
+     , (13, 38)
+     , (13, 15)
+     , (14, 31)
+     , (14, 32)
+     , (15, 15)
+     , (15, 31)
+     , (15, 43)
+     , (16, 29)
+     , (16, 20)
+     , (17, 22)
+     , (17, 15)
+     , (18, 42)
+     , (19, 24)
+     , (19, 31)
+     , (20, 20)
+     , (20, 31)
+     , (20, 27)
+     , (21, 15)
+     , (21, 40)
+     , (22, 37)
+     , (22, 31)
+     , (22, 43)
+     , (23, 33)
+     , (23, 18)
+     , (24, 23)
+     , (24, 10)
+     , (25, 17)
+     , (25, 16)
+     , (26, 26)
+     , (26, 15)
+     , (26, 43)
+     , (27, 16)
+     , (27, 15)
+     , (28, 19)
+     , (28, 15)
+     , (29, 24)
+     , (29, 25)
+     , (30, 25)
+     , (30, 24)
+     , (30, 31)
+     , (31, 15)
+     , (31, 26)
+     , (32, 16)
+     , (32, 15)
+     , (33, 45)
+     , (33, 12)
+     , (34, 34)
+     , (34, 32)
+     , (35, 32)
+     , (35, 31)
+     , (36, 13)
+     , (36, 12)
+     , (37, 14)
+     , (37, 10)
+     , (38, 43)
+     , (38, 44)
+     , (39, 46)
+     , (39, 16)
+     , (40, 28)
+     , (40, 16)
+     , (41, 29)
+     , (41, 30)
+     , (42, 47)
+     , (42, 16)
+     , (43, 31)
+     , (43, 18)
+     , (44, 21)
+     , (44, 25)
+     , (45, 39)
+     , (45, 29)
+     , (46, 35)
+     , (46, 26)
+     , (47, 28)
+     , (47, 20)
+     , (48, 26)
+     , (48, 27)
+     , (49, 15)
+     , (49, 12)
+     , (50, 44)
+     , (50, 13);
+
+INSERT INTO USER_PREFERENCES (user_id, action_tag_id, weight, last_recommended_at)
+VALUES (1, 1, 50, '2025-04-22 12:00:00')
+     , (1, 2, 50, '2025-04-22 12:00:00')
+     , (1, 3, 50, '2025-04-22 12:00:00')
+     , (1, 4, 50, '2025-04-22 12:00:00')
+     , (1, 5, 50, '2025-04-22 12:00:00')
+     , (1, 6, 50, '2025-04-22 12:00:00')
+     , (1, 7, 50, '2025-04-22 12:00:00')
+     , (1, 8, 50, '2025-04-22 12:00:00')
+     , (1, 9, 50, '2025-04-22 12:00:00')
+     , (1, 10, 50, '2025-04-22 12:00:00')
+     , (1, 11, 50, '2025-04-22 12:00:00')
+     , (1, 12, 50, '2025-04-22 12:00:00')
+     , (1, 13, 50, '2025-04-22 12:00:00')
+     , (1, 14, 50, '2025-04-22 12:00:00')
+     , (1, 15, 50, '2025-04-22 12:00:00')
+     , (1, 16, 50, '2025-04-22 12:00:00')
+     , (1, 17, 50, '2025-04-22 12:00:00')
+     , (1, 18, 50, '2025-04-22 12:00:00')
+     , (1, 19, 50, '2025-04-22 12:00:00')
+     , (1, 20, 50, '2025-04-22 12:00:00')
+     , (1, 21, 50, '2025-04-22 12:00:00')
+     , (1, 22, 50, '2025-04-22 12:00:00')
+     , (1, 23, 50, '2025-04-22 12:00:00')
+     , (1, 24, 50, '2025-04-22 12:00:00')
+     , (1, 25, 50, '2025-04-22 12:00:00')
+     , (1, 26, 50, '2025-04-22 12:00:00')
+     , (1, 27, 50, '2025-04-22 12:00:00')
+     , (1, 28, 50, '2025-04-22 12:00:00')
+     , (1, 29, 50, '2025-04-22 12:00:00')
+     , (1, 30, 50, '2025-04-22 12:00:00')
+     , (1, 31, 50, '2025-04-22 12:00:00')
+     , (1, 32, 50, '2025-04-22 12:00:00')
+     , (1, 33, 50, '2025-04-22 12:00:00')
+     , (1, 34, 50, '2025-04-22 12:00:00')
+     , (1, 35, 50, '2025-04-22 12:00:00')
+     , (1, 36, 50, '2025-04-22 12:00:00')
+     , (1, 37, 50, '2025-04-22 12:00:00')
+     , (1, 38, 50, '2025-04-22 12:00:00')
+     , (1, 39, 50, '2025-04-22 12:00:00')
+     , (1, 40, 50, '2025-04-22 12:00:00')
+     , (1, 42, 50, '2025-04-22 12:00:00')
+     , (1, 43, 50, '2025-04-22 12:00:00')
+     , (1, 44, 50, '2025-04-22 12:00:00')
+     , (1, 45, 50, '2025-04-22 12:00:00')
+     , (1, 46, 50, '2025-04-22 12:00:00')
+     , (1, 47, 50, '2025-04-22 12:00:00');
+
+INSERT INTO my_diary (id, title, content, created_at, is_deleted, is_confirmed, style_layer, user_id)
+VALUES (1, '김성민 너무 잘생긴 듯 ❤️', '정말 오랜만에 아침 출근길에 우산을 놓쳤는데 성민이가 잡아주었다. 특별한 하루였다.', '2025-04-08 18:23:00', 'N', 'Y', 'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/4962a9ae-3443-4c67-95ce-5b2011678714.jpg', 1),
+       (2, '헬스장에서 퍼스널 트레이닝 첫 수업', '헬스장에서 퍼스널 트레이닝 첫 수업은 예상보다 훨씬 즐거운 경험이었다.', '2025-04-09 21:17:00', 'N', 'Y', 'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/02882cae-9735-4ce2-9eb3-e9e2c6988f3e.jpg', 1),
+       (3, '친구들과 즉흥적으로 캠핑 떠남', '무심코 시작했지만 친구들과 즉흥적으로 캠핑 떠남 덕분에 좋은 하루를 보냈다.', '2025-04-10 20:46:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/2f795af7-90b8-49dc-b175-dddd782f7dc5.jpg', 1),
+       (4, '상사에게 칭찬 받은 날', '정말 오랜만에 상사에게 칭찬 받은 날을 하게 됐다. 특별한 하루였다.', '2025-04-11 19:05:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/970a78bb-e7f6-4e52-a237-dc0ba0ac9346.jpg', 1),
+       (5, '처음으로 필라테스 체험', '처음으로 필라테스 체험은 예상보다 훨씬 즐거운 경험이었다.', '2025-04-12 22:58:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/4c07e1de-a6bc-4355-83b4-f701822f9791.jpg', 1),
+       (6, '새로 오픈한 빵집 탐방', '새로 오픈한 빵집 탐방 덕분에 평소와는 다른 일상을 보낼 수 있었다.', '2025-04-13 19:12:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/bf1c41de-88c6-4ced-9dcf-eec74f671db0.jpg', 1),
+       (7, '동호회 첫 모임 참석', '동호회 첫 모임 참석은 예상보다 훨씬 즐거운 경험이었다.', '2025-04-14 22:01:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/61ad3a64-fd26-4ca0-9440-c24a6a10c761.jpg', 1),
+       (8, '야근하다가 피자 파티', '야근하다가 피자 파티은 예상보다 훨씬 즐거운 경험이었다.', '2025-04-15 21:29:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/d3546bdc-34f2-4d85-b4d8-e05e63529805.jpg', 1),
+       (9, '서점에서 우연히 좋은 책 발견', '무심코 시작했지만 서점에서 우연히 좋은 책 발견 덕분에 좋은 하루를 보냈다.', '2025-04-16 18:51:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/0775dc2d-1690-462d-b182-63e5a75b72ac.jpg', 1),
+       (10, '한강에서 자전거 타기', '무심코 시작했지만 한강에서 자전거 타기 덕분에 좋은 하루를 보냈다.', '2025-04-17 23:40:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/22cd4800-9eb4-46bf-92fd-6da3cd6c34ad.jpg', 1),
+       (11, '첫 면접 합격 소식', '무심코 시작했지만 첫 면접 합격 소식 덕분에 좋은 하루를 보냈다.', '2025-04-18 22:10:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/15026593-0f12-4baf-b7b9-14dc2684929e.jpg', 1),
+       (12, '봄비 맞으며 산책', '무심코 시작했지만 봄비 맞으며 산책 덕분에 좋은 하루를 보냈다.', '2025-04-19 20:45:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/ba3c4770-c0d5-4449-bb3e-4f0ac69a04f9.jpg', 1),
+       (13, '편의점 도시락 먹으며 야근', '편의점 도시락 먹으며 야근은 예상보다 훨씬 즐거운 경험이었다.', '2025-04-20 18:18:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/6db6366e-7ce7-470d-86e1-6068239c8e0a.jpg', 1),
+       (14, '강아지 미용시키고 산책', '정말 오랜만에 강아지 미용시키고 산책을 하게 됐다. 특별한 하루였다.', '2025-04-21 22:54:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/108c4f85-d331-42fb-a180-310e86306b30.jpg', 1),
+       (15, '쿠킹 클래스 수업 듣기', '쿠킹 클래스 수업 듣기은 예상보다 훨씬 즐거운 경험이었다.', '2025-04-22 21:33:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/add6b135-4d46-42c9-a949-d041c819121f.jpg', 1),
+       (16, '스트레스 해소로 볼링장 방문', '스트레스 해소로 볼링장 방문 덕분에 평소와는 다른 일상을 보낼 수 있었다.', '2025-04-23 19:27:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/cad234d6-1b82-492d-8e3a-43c79eaf93c9.jpg', 1),
+       (17, '퇴근길에 들른 작은 전시회', '퇴근길에 들른 작은 전시회 덕분에 평소와는 다른 일상을 보낼 수 있었다.', '2025-04-24 23:11:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/e513e99e-36b7-4959-b5e9-a60b41de06e3.jpg', 1),
+       (18, '지하철역에서 버스킹 구경', '정말 오랜만에 지하철역에서 버스킹 구경을 하게 됐다. 특별한 하루였다.', '2025-04-25 19:00:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/6aef6e13-0b15-42ba-8c26-e58080c8b3e6.jpg', 1),
+       (19, '패션위크 스트리트 포토 참가', '무심코 시작했지만 패션위크 스트리트 포토 참가 덕분에 좋은 하루를 보냈다.', '2025-04-26 20:37:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/99fe40e6-33d6-4c06-9aec-73eda640ffd2.jpg', 1),
+       (20, '일 끝나고 친구랑 맥주 한 잔', '일 끝나고 친구랑 맥주 한 잔은 예상보다 훨씬 즐거운 경험이었다.', '2025-04-27 21:44:00', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/729de3a2-ddda-4faa-b760-bf79af511964.jpg', 1),
+       (21, '무너진 하루', '오늘은 아무것도 제대로 되지 않았다.
+아침부터 눈을 뜨기 힘들었고, 일어나자마자 숨이 턱 막히는 듯한 기분이 들었다.
+무언가를 해야 한다는 압박감과 아무것도 하고 싶지 않은 무력감이 서로 충돌하다가, 결국 나는 그 사이에 짓눌려 멍하니 시간을 흘려보냈다.
+
+하루 종일 머리는 무겁고 마음은 허전했다.
+누군가와 대화를 해도 마음이 닿지 않았고, 아무리 억지로 웃어도 웃음 뒤엔 공허함만 남았다.
+작은 실수 하나에도 자책이 쏟아지고, 그 자책은 또 다른 실수를 불러왔다.
+
+무기력한 하루를 마치고 돌아오는 길, 거리에선 사람들의 웃음소리가 들렸지만, 나는 그 소리조차 낯설게 느껴졌다.
+그냥… 나만 이 세상에 어울리지 않는 이방인처럼 느껴졌다.
+
+오늘은 유난히,
+혼자인 게 아니라
+텅 빈 것 같았다.
+', '2025-04-28', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/e1c44c0c-0e4f-4ce8-b0f2-dc4f74353b07.jpg', 1),
+       ( 22, '흐린 날 뒤에 찾아온 햇살', '오늘은 왠지 모르게 가슴이 조금 덜 무거웠다.
+어제까지만 해도 모든 게 버겁고, 앞으로 나아가는 게 무의미하게 느껴졌는데…
+아침 햇살이 유난히 따뜻하게 느껴졌던 오늘, 작은 변화들이 나를 조금씩 일으켜 세웠다.
+
+카페에서 우연히 들은 노래 한 곡이 마음을 어루만졌고,
+지나가는 아이의 해맑은 웃음이 괜히 눈시울을 붉히게 만들었다.
+아무 일도 일어나지 않았지만, 모든 게 새롭게 보이는 날이었다.
+
+이대로 괜찮다고,
+잘하고 있다고,
+조금 늦어도 된다고
+내 안의 조용한 목소리가 다정하게 말을 건네왔다.
+
+아직은 어둠이 완전히 걷히진 않았지만,
+분명히 저 멀리 어딘가에서 빛이 나를 기다리고 있다는 걸 느낀 하루였다.
+
+오늘은,
+다시 한 번 살아보고 싶어졌다.'
+       , '2025-04-29', 'N', 'Y'
+       , 'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/f8ce14ff-4136-4f00-85e0-625e7c2cf913.jpg', 1),
+       ( 23, '조용한 방, 조용한 나', '오늘 하루는 아무에게도 말을 걸지 않았다.
+누구에게도 연락이 오지 않았고, 나도 아무에게도 연락하지 않았다.
+핸드폰을 들었다가, 다시 내려놓기를 수십 번.
+그래도, 누구 하나 나를 찾지 않는다.
+
+불 꺼진 방 안에서,
+내 존재가 아주 작아지는 기분이 들었다.
+누군가 그립지만, 막상 전화기를 들어도 번호가 떠오르지 않았다.
+이런 날엔 그냥 눈 감고, 내일을 기대해야만 할까.'
+       , '2025-04-30', 'N', 'Y'
+       , 'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/61bd61f4-68ca-4c9e-bcc0-a2c47c57e1db.jpg', 1),
+       (24, '흐린 날의 온도, 그리고 마음의 결', '오늘 하루는 회색빛으로 시작되었다.
+햇살 한 점 없이 드리운 구름 사이로, 잔잔한 빗방울이 흘러내렸다.
+아침부터 어딘가 모르게 마음이 눅눅했고, 커튼을 젖히는 손끝마저 천천히 움직였다.
+비 오는 날은 늘 마음이 조금 더 솔직해지는 것 같다.
+억지로 괜찮은 척 하지 않아도 되는, 그런 묘한 여유가 스며든다.
+
+창가에 앉아 책을 펼쳐놓고 몇 줄을 읽다 말았다.
+머릿속은 자꾸 다른 생각으로 채워졌다.
+최근 몇 주 동안 바쁘게 살아온 것 같지만
+정작 내가 어디로 향하고 있는지 모르겠는 기분.
+누군가에게 털어놓고 싶지만, 말로 꺼내는 순간 오히려 더 흐려질까 봐
+그저 조용히 커피를 한 모금 삼켰다.
+
+밖은 여전히 흐렸다.
+하지만 그 흐림 속에도 아름다움은 있었다.
+차창 밖을 흐르는 빗방울, 우산을 나눠 쓰는 연인들,
+그리고 고요한 그 분위기 속에서도 자신의 속도로 걸어가는 사람들.
+그 모든 것들이 묘하게 위로처럼 다가왔다.
+내가 지금 잠시 멈춰 서 있다고 해서,
+그게 틀린 건 아니라고 말해주는 것만 같았다.
+
+문득 이런 생각이 들었다.
+‘마음에도 결이 있다면, 오늘의 나는 조금 거칠지만 따뜻한 결일지도 모르겠다.’
+완벽하지 않아도 괜찮고, 조금 느려도 괜찮고, 흔들려도 괜찮다.
+오늘은 그저, 나의 호흡과 온도에 맞게 하루를 살아냈다는 것만으로도 충분하다.
+
+어쩌면… 내일은 조금 더 따뜻한 햇살이 비추겠지.
+그리고 나는 또다시, 나를 조금 더 이해하게 될 것이다.',
+        '2025-04-30', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/df438e97-ff56-4eb5-a787-e2db77f2a472.jpg', 1),
+       (25, '지치는 하루의 끝자락에서', '오늘 하루는 시작부터 무거웠다.
+눈을 떴을 때부터 몸이 말을 듣지 않았다.
+출근길 지하철 안에서 멍하니 창밖만 바라보며
+''왜 이렇게 피곤하지''를 몇 번이나 되뇌었는지 모르겠다.
+
+업무는 끝이 없고, 집중력은 바닥을 치고,
+누가 나를 불러도 몇 초는 지나야 겨우 반응할 수 있었다.
+점심을 먹어도 에너지가 차오르지 않고,
+오후엔 책상에 앉은 채 잠깐 눈을 감았다가 깜짝 놀라 일어나기를 반복했다.
+
+몸만 피곤한 게 아니다.
+마음도, 생각도, 감정도 전부 바닥났다.
+누군가에게 기대고 싶어도 그럴 여유조차 없고,
+그냥… 아무 말 없이 조용한 방에 누워있고 싶었다.
+
+지금 이 일기를 쓰는 것도 사실은 힘에 부친다.
+하지만 무언가라도 털어내고 나면 조금은 괜찮아질까 싶어
+비몽사몽 속에서 글을 적는다.
+
+오늘은 그냥,
+너무 피곤한 하루였다.
+그것만으로도 충분하다.',
+        '2025-05-01', 'N', 'Y',
+        'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/eacf2ea1-baff-4af1-bfa5-6ee2bb042eca.jpg', 1);
+
+
+INSERT INTO emotion_analyze (id, positive_score, neutral_score, negative_score, total_score, emotion_summary1,
+                             emotion_summary2, emotion_summary3, my_diary_summary, my_diary_id)
+VALUES (1, 37, 20, 0, 26, '자부심', '외로움', '실망', '아침 출근길에 우산을 놓침', 1),
+       (2, 72, 0, 5, 44, '만족', '죄책감', '외로움', '헬스장에서 퍼스널 트레이닝 첫 수업', 2),
+       (3, 78, 5, 0, 47, '분노', '지루함', '후회', '친구들과 즉흥적으로 캠핑 떠남', 3),
+       (4, 82, 28, 8, 56, '안도', '설렘', '후회', '상사에게 칭찬 받은 날', 4),
+       (5, 83, 20, 25, 58, '불안', '자신감', '지루함', '처음으로 필라테스 체험', 5),
+       (6, 64, 29, 3, 44, '분노', '두려움', '수용', '새로 오픈한 빵집 탐방', 6),
+       (7, 33, 16, 1, 23, '수치심', '애정', '자신감', '동호회 첫 모임 참석', 7),
+       (8, 72, 19, 21, 51, '후회', '그리움', '실망', '야근하다가 피자 파티', 8),
+       (9, 35, 13, 25, 28, '질투', '기쁨', '평온', '서점에서 우연히 좋은 책 발견', 9),
+       (10, 93, 26, 19, 64, '재미', '슬픔', '평온', '한강에서 자전거 타기', 10),
+       (11, 47, 22, 6, 33, '자신감', '죄책감', '실망', '첫 면접 합격 소식', 11),
+       (12, 55, 23, 26, 42, '실망', '애정', '평온', '봄비 맞으며 산책', 12),
+       (13, 43, 4, 20, 30, '호기심', '몰입', '그리움', '편의점 도시락 먹으며 야근', 13),
+       (14, 41, 14, 12, 29, '그리움', '수용', '희망', '강아지 미용시키고 산책', 14),
+       (15, 68, 22, 14, 47, '슬픔', '호기심', '희망', '쿠킹 클래스 수업 듣기', 15),
+       (16, 41, 19, 18, 32, '그리움', '기쁨', '불안', '스트레스 해소로 볼링장 방문', 16),
+       (17, 31, 17, 8, 23, '만족', '분노', '외로움', '퇴근길에 들른 작은 전시회', 17),
+       (18, 82, 4, 25, 75, '좌절', '복합 감정', '애정', '지하철역에서 버스킹 구경', 18),
+       (19, 33, 3, 20, 70, '애정', '복합 감정', '두려움', '패션위크 스트리트 포토 참가', 19),
+       (20, 41, 23, 11, 80, '좌절', '그리움', '질투', '일 끝나고 친구랑 맥주 한 잔', 20),
+       (21, 5, 10, 85, 15, '무기력', '공허함', '외로움', '무기력함에 짓눌린 하루', 21),
+       (22, 75, 15, 10, 60, '희망', '따뜻함', '안도', '작은 변화 속 다정한 회복', 22),
+       (23, 10, 20, 70, 25, '고립감', '그리움', '허무함', '아무도 찾지 않는 고요한 하루', 23),
+       (24, 55, 30, 15, 43, '차분함', '회고', '위로', '흐림 속에도 따뜻한 하루', 24),
+       (25,12,18,70,33,'피로','무기력','외로움','지치는 하루의 끝자락에서',25);
+
+INSERT INTO moodlog (content, month, user_id)
+VALUES ('테스트 문구입니다.', '2025-04-01', 1);
+
+INSERT INTO tag (id, tag_name)
+VALUES (1, '일상'),
+       (2, '데일리'),
+       (3, '소확행'),
+       (4, '행복'),
+       (5, '힐링'),
+       (6, '오늘'),
+       (7, '여행'),
+       (8, '카페'),
+       (9, '감성'),
+       (10, '사랑'),
+       (11, '웃음'),
+       (12, '추억'),
+       (13, '여유'),
+       (14, '일상스타그램'),
+       (15, '맛집'),
+       (16, '자기계발'),
+       (17, '성장'),
+       (18, '셀카'),
+       (19, '풍경'),
+       (20, '기록');

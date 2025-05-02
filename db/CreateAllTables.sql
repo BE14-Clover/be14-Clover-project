@@ -252,3 +252,4 @@ CREATE TABLE IF NOT EXISTS jwt_blacklist
 
 ALTER TABLE password_reset_token
     ADD CONSTRAINT uq_prt_user UNIQUE(user_id);
+
