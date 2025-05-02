@@ -291,10 +291,17 @@ VALUES (-1, '관리자', '010-0000-0000', 'ADMIN@moodiary.com',
         '$2a$10$mE2/0khQFVKsELdzmfzpduXv92iYQgDujd469fIMJ.qxnjKr3AlN.', 'N', '개발자', 1);
 
 INSERT INTO pet (id, pet_name, pet_img)
-VALUES (1, '공룡', 'https://i.pinimg.com/originals/05/79/d4/0579d4e6568c980df96b447fbc358014.gif'),
-       (2, '강아지', 'https://i.pinimg.com/736x/23/db/6e/23db6e1fe41c5ce16f1f6b577fd95e0f.jpg'),
-       (3, '오리', 'https://i.pinimg.com/originals/71/88/0f/71880f60fc9fa0973ef856dffed68e80.gif'),
-       (4, '고양이', 'https://i.pinimg.com/736x/30/14/89/301489e41d6da1b4177ca7655daad80d.jpg');
+VALUES (1, 'pet1', '/src/assets/pets/pet01.png'),
+       (2, 'pet2', '/src/assets/pets/pet02.png'),
+       (3, 'pet3', '/src/assets/pets/pet03.png'),
+       (4, 'pet4', '/src/assets/pets/pet04.png'),
+       (5, 'pet5', '/src/assets/pets/pet05.png'),
+       (6, 'pet6', '/src/assets/pets/pet06.png'),
+       (7, 'pet7', '/src/assets/pets/pet07.png'),
+       (8, 'pet8', '/src/assets/pets/pet08.png'),
+       (9, 'pet9', '/src/assets/pets/pet09.png'),
+       (10, 'pet10', '/src/assets/pets/pet10.png'),
+       (11, 'pet11', '/src/assets/pets/pet11.png');
 
 INSERT INTO shared_diary_room (id, user_id1, user_id2)
 VALUES (1, 1, 2),
@@ -618,7 +625,12 @@ VALUES (1, 1, 50, '2025-04-22 12:00:00')
      , (1, 47, 50, '2025-04-22 12:00:00');
 
 INSERT INTO my_diary (id, title, content, created_at, is_deleted, is_confirmed, style_layer, user_id)
-VALUES (1, '김성민 너무 잘생긴 듯 ❤️', '정말 오랜만에 아침 출근길에 우산을 놓쳤는데 성민이가 잡아주었다. 특별한 하루였다.', '2025-04-08 18:23:00', 'N', 'Y', 'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/4962a9ae-3443-4c67-95ce-5b2011678714.jpg', 1),
+VALUES (1, '성연아 생일 축하해~ ❤️', '오늘은 성연이의 생일이었다.
+늘 조용하고 따뜻하게 옆에 있어줬던 친구.
+그래서일까, 어쩌면 내 생일보다 더 마음이 간 날이었다.
+
+작은 케이크 하나, 짧은 메시지 하나,
+소박하지만 진심을 담아 전했다.', '2025-04-08 18:23:00', 'N', 'Y', 'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/2ada2362-bdd2-4b88-8ac9-fc1aac1eabba.jpg', 1),
        (2, '헬스장에서 퍼스널 트레이닝 첫 수업', '헬스장에서 퍼스널 트레이닝 첫 수업은 예상보다 훨씬 즐거운 경험이었다.', '2025-04-09 21:17:00', 'N', 'Y', 'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/02882cae-9735-4ce2-9eb3-e9e2c6988f3e.jpg', 1),
        (3, '친구들과 즉흥적으로 캠핑 떠남', '무심코 시작했지만 친구들과 즉흥적으로 캠핑 떠남 덕분에 좋은 하루를 보냈다.', '2025-04-10 20:46:00', 'N', 'Y',
         'https://teamflover.s3.ap-northeast-2.amazonaws.com/images/2f795af7-90b8-49dc-b175-dddd782f7dc5.jpg', 1),
@@ -811,3 +823,10 @@ VALUES (1, '일상'),
        (18, '셀카'),
        (19, '풍경'),
        (20, '기록');
+
+INSERT INTO user_pet (user_id, pet_id)
+VALUES (1, 1)
+     , (2, 1)
+     , (3, 1)
+     , (4, 1)
+     , (5, 1);
