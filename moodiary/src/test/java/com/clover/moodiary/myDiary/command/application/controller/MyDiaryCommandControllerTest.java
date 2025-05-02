@@ -43,7 +43,7 @@ class MyDiaryCommandControllerTest {
         );
     }
 
-
+    @Transactional
     @Test
     @DisplayName("/regist 일기 등록 API 테스트")
     void registDiary() throws Exception {
@@ -67,11 +67,12 @@ class MyDiaryCommandControllerTest {
                 .andExpect(result -> assertThat(result.getResponse().getContentAsString()).contains("일기 등록 완료"));
     }
 
+    @Transactional
     @Test
     @DisplayName("/update 일기 수정 API 테스트")
     void updateDiary() throws Exception {
         MyDiaryCommandDTO dto = new MyDiaryCommandDTO();
-        dto.setId(1);
+        dto.setId(2);
         dto.setTitle("수정 제목");
         dto.setContent("수정 내용");
         dto.setUserId(1);
@@ -82,9 +83,11 @@ class MyDiaryCommandControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-                .andExpect(result -> assertThat(result.getResponse().getContentAsString()).contains("일기 수정 완료"));
+                .andExpect(result -> assertThat(result.getResponse()
+                        .getContentAsString()).contains("일기 수정 완료"));
     }
 
+    @Transactional
     @Test
     @DisplayName("/upload 이미지 업로드 API 테스트")
     void uploadImage() throws Exception {
@@ -96,14 +99,16 @@ class MyDiaryCommandControllerTest {
                 .andExpect(jsonPath("$.url").exists());
     }
 
+    @Transactional
     @Test
     @DisplayName("/delete 일기 삭제 API 테스트")
     void deleteDiary() throws Exception {
-        mockMvc.perform(delete("/mydiary/{diaryId}", 1))
+        mockMvc.perform(delete("/mydiary/{diaryId}", 2))
                 .andExpect(status().isOk())
                 .andExpect(result -> assertThat(result.getResponse().getContentAsString()).contains("일기 삭제"));
     }
 
+    @Transactional
     @Test
     @DisplayName("/registEmotion 감정 분석 등록 API 테스트")
     void registEmotion() throws Exception {
@@ -124,6 +129,7 @@ class MyDiaryCommandControllerTest {
                 .andExpect(status().isCreated());
     }
 
+    @Transactional
     @Test
     @DisplayName("/moodlog 기분 로그 등록 API 테스트")
     void registMoodlog() throws Exception {

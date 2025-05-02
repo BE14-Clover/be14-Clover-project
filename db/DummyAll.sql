@@ -19,10 +19,18 @@ VALUES (-1, '관리자', '010-0000-0000', 'ADMIN@moodiary.com', '$2a$10$mE2/0khQ
        (5, '이청민', '010-5678-9012', 'charlie4822@gmail.com', '$2a$10$mE2/0khQFVKsELdzmfzpduXv92iYQgDujd469fIMJ.qxnjKr3AlN.', 'N', '개발자', 1);
 
 INSERT INTO pet (id, pet_name, pet_img)
-VALUES (1, '공룡', 'https://i.pinimg.com/originals/05/79/d4/0579d4e6568c980df96b447fbc358014.gif'),
-       (2, '강아지', 'https://i.pinimg.com/736x/23/db/6e/23db6e1fe41c5ce16f1f6b577fd95e0f.jpg'),
-       (3, '오리', 'https://i.pinimg.com/originals/71/88/0f/71880f60fc9fa0973ef856dffed68e80.gif'),
-       (4, '고양이', 'https://i.pinimg.com/736x/30/14/89/301489e41d6da1b4177ca7655daad80d.jpg');
+VALUES (1, 'pet1', '/src/assets/pets/pet01.png'),
+       (2, 'pet2', '/src/assets/pets/pet02.png'),
+       (3, 'pet3', '/src/assets/pets/pet03.png'),
+       (4, 'pet4', '/src/assets/pets/pet04.png'),
+       (5, 'pet5', '/src/assets/pets/pet05.png'),
+       (6, 'pet6', '/src/assets/pets/pet06.png'),
+       (7, 'pet7', '/src/assets/pets/pet07.png'),
+       (8, 'pet8', '/src/assets/pets/pet08.png'),
+       (9, 'pet9', '/src/assets/pets/pet09.png'),
+       (10, 'pet10', '/src/assets/pets/pet10.png'),
+       (11, 'pet11', '/src/assets/pets/pet11.png');
+
 
 INSERT INTO shared_diary_room (id, user_id1, user_id2)
 VALUES (1, 1, 2),
@@ -492,3 +500,10 @@ INSERT INTO tag (id, tag_name) VALUES
 (18, '셀카'),
 (19, '풍경'),
 (20, '기록');
+
+INSERT INTO user_pet (user_id, pet_id)
+VALUES (1, 1)
+     , (2, 1)
+     , (3, 1)
+     , (4, 1)
+     , (5, 1);
