@@ -55,7 +55,7 @@ class MyDiaryQueryControllerTest {
     @DisplayName("일기 조회 (날짜 요청 파라미터) - 통합 테스트")
     void testGetDiaryByDateRequestParam() {
         setAuthentication(1);
-        MyDiaryDTO result = myDiaryQueryController.getDiaryByDate(LocalDate.of(2025, 5, 2));
+        MyDiaryDTO result = myDiaryQueryController.getDiaryByDate(LocalDate.of(2025, 4, 20));
 
         assertNotNull(result);
         assertEquals(1, result.getUserId());
