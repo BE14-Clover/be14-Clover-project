@@ -1,5 +1,9 @@
 package com.clover.moodiary.user.command.service;
 
+import com.clover.moodiary.pets.command.domain.aggregate.entity.PetEntity;
+import com.clover.moodiary.pets.command.domain.aggregate.entity.UserPetEntity;
+import com.clover.moodiary.pets.command.domain.repository.PetRepository;
+import com.clover.moodiary.pets.command.domain.repository.UserPetRepository;
 import com.clover.moodiary.user.command.dto.*;
 import com.clover.moodiary.user.command.entity.PasswordResetToken;
 import com.clover.moodiary.user.command.entity.RegisterQuestion;
@@ -32,15 +36,16 @@ public class UserCommandServiceImpl implements UserCommandService {
 	private final BCryptPasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
 	private final MailUtil mailUtil;
+	private final UserPetRepository userPetRepository;
+	private final PetRepository petRepository;
 
 	@Override
 	@Transactional
 	public void register(RegisterRequest dto) {
-		// 1) 질문 엔티티 조회
+
 		RegisterQuestion q = questionRepo.findById(dto.getRegisterQuestionsId())
 			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 질문 ID"));
 
-		// 2) User 엔티티 생성 & 저장
 		User u = User.builder()
 			.name(dto.getName())
 			.email(dto.getEmail())
@@ -51,7 +56,14 @@ public class UserCommandServiceImpl implements UserCommandService {
 			.build();
 
 		userRepo.save(u);
+
+		PetEntity pet = petRepository.findById(1)
+			.orElseThrow(() -> new IllegalArgumentException("기본 펫이 존재하지 않습니다."));
+
+		UserPetEntity userPet = new UserPetEntity(u.getId(), pet.getId());
+		userPetRepository.save(userPet);
 	}
+
 
 	@Override
 	public void deleteAccount(int userId) {
