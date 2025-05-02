@@ -65,7 +65,7 @@ class MyDiaryQueryControllerTest {
     @DisplayName("일기 조회 (PathVariable) - 통합 테스트")
     void testGetDiaryByDatePathVariable() {
         setAuthentication(1);
-        MyDiaryDTO result = myDiaryQueryController.getDiaryByDate("2025-05-02");
+        MyDiaryDTO result = myDiaryQueryController.getDiaryByDate("2025-04-20");
 
         assertNotNull(result);
         assertEquals(1, result.getUserId());
